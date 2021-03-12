@@ -20,30 +20,19 @@ bool Poll::Initialise(std::string configfile, DataModel &data){
 bool Poll::Execute(){
 
   //LV
-  int LVstate = m_data->CB->GetLV();
-  if(LVstate==0)
-  {
-  	m_data->SCMonitor.LV_mon = 0;
-  }else if(LVstate==1)
-  {
-  	m_data->SCMonitor.LV_mon = 1;
-  }else
-  {
-  	std::cout << "There has been an error with: " << LVstate << std::endl;
-  }
+  int LVstate = m_data->CB->GetLV_ONOFF();
+  m_data->SCMonitor.LV_mon = LVstate;
+
+  
+  std::vector<float> LVvoltage = m_data->CB->GetLV_voltage();
+  m_data->SCMonitor.v33 = LVvoltage[0];
+  m_data->SCMonitor.v25 = LVvoltage[1];
+  m_data->SCMonitor.v12 = LVvoltage[2];
 
   //HV
   int HVstate = m_data->CB->GetHV_ONOFF();
-  if(HVstate==0)
-  {
-  	m_data->SCMonitor.HV_mon = 0;
-  }else if(HVstate==1)
-  {
-  	m_data->SCMonitor.HV_mon = 1;
-  }else
-  {
-  	std::cout << "There has been an error: " << HVstate << std::endl;
-  }
+  m_data->SCMonitor.HV_mon = HVstate;
+
 
   //RHT
   vector<float> RHT = m_data->CB->GetTemp();
@@ -60,6 +49,9 @@ bool Poll::Execute(){
   m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
   m_data->SCMonitor.relayCh2_mon = m_data->CB->GetRelayState(2);
   m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
+  
+  //Photodiode
+  m_data->SCMonitor.light = m_data->CB->GetPhotodiode();
 
   return true;
 }
