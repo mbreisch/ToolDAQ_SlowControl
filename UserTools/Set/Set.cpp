@@ -13,6 +13,10 @@ bool Set::Initialise(std::string configfile, DataModel &data){
  
   m_data->CB= new Canbus();
   m_data->CB->Connect(); 
+	
+  std::fstream infile("./configfiles/LastHV.txt", std::ios_base::in);
+  infile >> m_data->CB->get_HV_volts;
+  infile.close();
 
   if(!m_variables.Get("verbose",m_verbose)) m_verbose=1;
 
@@ -84,6 +88,9 @@ bool Set::Execute(){
       if(retval==1)
       {
         m_data->CB->get_HV_volts = m_data->SCMonitor.HV_volts;
+	std::fstream outfile("./configfiles/LastHV.txt", std::ios_base::out | std::ios_base::trunc);
+  	outfile << m_data->CB->get_HV_volts;
+ 	outfile.close();
       }else
       {
         std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
