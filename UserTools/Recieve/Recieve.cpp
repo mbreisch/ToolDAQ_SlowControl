@@ -32,10 +32,10 @@ bool Recieve::Execute(){
   int timer;
   if(m_data->SCMonitor.recieveFlag==0)
   {
-    timer = 1000;
+    timer = -1;
   }else
   {
-    timer = 10;
+    timer = 100;
   }
 
   zmq::poll(&items[0], 1, timer);
