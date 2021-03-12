@@ -708,7 +708,7 @@ int Canbus::SetLV(bool state){
 //4: error on read
 //5: error on message interprete
 //6: Why?
-int Canbus::GetLV(){ 
+int Canbus::GetLV_ONOFF(){ 
 	unsigned int id = 0x022;
 	unsigned long long msg = 0x0000DEADBEEF0000;
 	int LV_state=6;
@@ -768,6 +768,81 @@ int Canbus::GetLV(){
 	}
 
 	return LV_state;
+}
+
+//sends a can message to get the LV voltages
+//returns:
+//empty vector on fail, otherwise
+// vector for {3.3V,2.5V,1.2V}
+vector<float> Canbus::GetLV_voltage(){ 
+	unsigned int id = 0x3AD;
+	unsigned long long msg = 0x00AD00AD00AD00AD;
+	std::vector<float> volts ={-1,-1,-1};
+	float v33, v25, v12;
+	
+	//Ask for sensor data
+	if(createCanFrame(id,msg,&frame)!=0){
+		fprintf(stderr, "LV: Wrong format!\n\n");
+		return 2;
+	}
+	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
+		fprintf(stderr, "LV: Write error!\n\n");
+		return 3;
+	}
+		
+	//Recieve sensor data 
+	char rec_id[5];
+	char rec_temp[3];
+	char *rec_message; rec_message = (char*) malloc(64);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+			fprintf(stderr, "LV: Read error!\n\n");	
+			return 4;
+		}
+
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
+	}
+	
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
+
+	if(retID == 0x3DA)
+	{	
+		unsigned int v33h = ((rec_message & 0xFFFF000000000000) >> 48);
+		unsigned int v25h = ((rec_message & 0x000000FFFF000000) >> 24);
+		unsigned int v12h = (rec_message & 0x000000000000FFFF);
+		
+		v33 = ... *v33h;
+		if(v33>=0)
+		{
+			volts[0] = (v33);
+		}
+		v25 = ... *v25h;
+		if(v25>=0)
+		{
+			volts[1] = (v25);
+		}
+		v12 = ... *v12h;
+		if(v12>=0)
+		{
+			volts[2] = (v12);
+		}
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after LV check\n");
+		return 5;
+	}
+
+	return volts;
 }
 
 int Canbus::SetRelay(int idx, bool state){
