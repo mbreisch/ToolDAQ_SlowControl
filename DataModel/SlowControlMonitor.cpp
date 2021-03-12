@@ -30,6 +30,15 @@ bool SlowControlMonitor::Send_Mon(zmq::socket_t* sock){
 	std::memcpy(msg10.data(), &Trig0_mon, sizeof Trig0_mon);
 	zmq::message_t msg11(sizeof Trig1_mon);
 	std::memcpy(msg11.data(), &Trig1_mon, sizeof Trig1_mon);
+	zmq::message_t msg12(sizeof v33);
+	std::memcpy(msg12.data(), &v33, sizeof v33);
+	zmq::message_t msg13(sizeof v25);
+	std::memcpy(msg13.data(), &v25, sizeof v25);
+	zmq::message_t msg14(sizeof v12);
+	std::memcpy(msg14.data(), &v12, sizeof v12);
+	zmq::message_t msg15(sizeof light);
+	std::memcpy(msg15.data(), &light, sizeof light);
+
 
 	sock->send(msg0,ZMQ_SNDMORE);
 	sock->send(msg1,ZMQ_SNDMORE);
@@ -42,7 +51,11 @@ bool SlowControlMonitor::Send_Mon(zmq::socket_t* sock){
 	sock->send(msg8,ZMQ_SNDMORE);
 	sock->send(msg9,ZMQ_SNDMORE);
 	sock->send(msg10,ZMQ_SNDMORE);
-	sock->send(msg11);
+	sock->send(msg11,ZMQ_SNDMORE);
+	sock->send(msg12,ZMQ_SNDMORE);
+	sock->send(msg13,ZMQ_SNDMORE);
+	sock->send(msg14,ZMQ_SNDMORE);
+	sock->send(msg15);
 
 	return true;
 }
@@ -86,7 +99,17 @@ bool SlowControlMonitor::Receive_Mon(zmq::socket_t* sock){
   Trig0_mon=*(reinterpret_cast<float*>(msg.data()));
   sock->recv(&msg);   
   Trig1_mon=*(reinterpret_cast<float*>(msg.data())); 
-  
+	
+  //Addioions
+  sock->recv(&msg);   
+  v33=*(reinterpret_cast<float*>(msg.data()));	
+  sock->recv(&msg);   
+  v25=*(reinterpret_cast<float*>(msg.data()));
+  sock->recv(&msg);   
+  v12=*(reinterpret_cast<float*>(msg.data()));
+  sock->recv(&msg);   
+  light=*(reinterpret_cast<float*>(msg.data()));
+	
   return true;
 }
 
