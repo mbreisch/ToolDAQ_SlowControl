@@ -22,16 +22,6 @@ bool Canbus::Disconnect(){
 	return true;
 }
 
-bool Canbus::GetLeak(){ 
-
-	return true;
-}
-
-float Canbus::GetLight(){ 
-
-	return true;
-}
-
 //gets the photodiode light level
 //returns 
 //-n for fail
@@ -867,9 +857,9 @@ vector<float> Canbus::GetLV_voltage(){
 
 	if(retID == 0x3DA)
 	{	
-		unsigned int v33h = ((rec_message & 0xFFFF000000000000) >> 48);
-		unsigned int v25h = ((rec_message & 0x000000FFFF000000) >> 24);
-		unsigned int v12h = (rec_message & 0x000000000000FFFF);
+		unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
+		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
+		unsigned int v12h = (retMSG & 0x000000000000FFFF);
 		
 		v33 = ... *v33h;
 		if(v33>=0)
