@@ -34,6 +34,9 @@ class SlowControlMonitor : public SerialisableObject{
   //LV
   int LV_mon;
   bool LV_state_set;
+  float v33;
+  float v25;
+  float v12;
 
   //Emergency variables
   float LIMIT_temperature_low = 0;
@@ -57,6 +60,9 @@ class SlowControlMonitor : public SerialisableObject{
   float Trig1_mon;
   float Trig0_threshold;
   float Trig0_mon;
+ 
+  //Light level
+  float light;
   
   bool SetDefaults();
   bool Print();
@@ -73,6 +79,9 @@ class SlowControlMonitor : public SerialisableObject{
   ar & HV_volts;
   ar & LV_mon;
   ar & LV_state_set;
+  ar & v33;
+  ar & v25;
+  ar & v12;
   ar & LIMIT_temperature_low;
   ar & LIMIT_humidity_low;
   ar & LIMIT_temperature_high;
@@ -90,7 +99,7 @@ class SlowControlMonitor : public SerialisableObject{
   ar & relayCh1_mon;
   ar & relayCh2_mon;
   ar & relayCh3_mon;
- 
+  ar & light;
  }
  
 };
