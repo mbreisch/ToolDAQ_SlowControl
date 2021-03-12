@@ -4,6 +4,7 @@
 #include "zmq.hpp"
 #include <SerialisableObject.h>
 #include <iostream>
+#include <iomanip>
 
 class SlowControlMonitor : public SerialisableObject{
 
