@@ -48,8 +48,12 @@ public:
 
 	//LV
 	int SetLV(bool state); //done
-	int GetLV(); //done
+	int GetLV_ONOFF(); //done
+	vector<float> GetLV_voltage(); //calc
 
+	//Light
+	float GetPhotodiode(); // calc
+	
 	//HV
 	int SetHV_ONOFF(bool state); //done
 	int SetHV_voltage(float volts); //done
@@ -68,12 +72,6 @@ public:
 	//Relay
 	int SetRelay(int idx, bool state);
 	bool GetRelayState(int idx);
-
-	//??
-	bool GetLeak();
-	float GetLight();
-	
-
 
 
 	int s;
