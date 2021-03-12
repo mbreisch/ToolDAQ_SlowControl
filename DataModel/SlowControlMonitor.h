@@ -28,12 +28,12 @@ class SlowControlMonitor : public SerialisableObject{
   float temperature_mon;
   
   //HV
-  int HV_mon;
+  int HV_mon=-1;
   bool HV_state_set;
-  float HV_volts;
+  float HV_volts=-1;
 
   //LV
-  int LV_mon;
+  int LV_mon=-1;
   bool LV_state_set;
   float v33;
   float v25;
@@ -58,9 +58,9 @@ class SlowControlMonitor : public SerialisableObject{
   //Triggerboard
   float TrigVref;
   float Trig1_threshold;
-  float Trig1_mon;
+  float Trig1_mon=-1;
   float Trig0_threshold;
-  float Trig0_mon;
+  float Trig0_mon=-1;
  
   //Light level
   float light;
