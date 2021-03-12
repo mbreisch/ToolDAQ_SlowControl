@@ -32,7 +32,64 @@ float Canbus::GetLight(){
 	return true;
 }
 
+//gets the photodiode light level
+//returns 
+//-n for fail
+//float value for level
+float Canbus::GetPhotodiode()
+{
+	float light = -1;
+	unsigned int id = 0x00D;
+	unsigned long long msg = 0x000D000D000D000D;
 
+	//Ask for sensor data
+	if(createCanFrame(id,msg,&frame)!=0){
+		fprintf(stderr, "DAC0: Wrong format!\n\n");
+		return -2;
+	}
+	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
+		fprintf(stderr, "DAC0: Write error!\n\n");
+		return -3;
+	}
+
+	//Recieve sensor data 
+	char rec_id[5];
+	char rec_temp[3];
+	char *rec_message; rec_message = (char*) malloc(64);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+			fprintf(stderr, "DAC0: Read error!\n\n");	
+			return -4;
+		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
+	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	if(retID == 0x0D0)
+	{
+		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
+		light = ...*lighth;
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after DAC0 check\n");
+		return -5;		
+	}	
+	
+	return light;	
+}
+
+//----check-----
 float Canbus::GetTriggerDac0(float VREF)
 {
 	unsigned int id = 0x0BC;
@@ -88,6 +145,7 @@ float Canbus::GetTriggerDac0(float VREF)
 	}
 }
 
+//----check-----
 float Canbus::GetTriggerDac1(float VREF)
 {
 	unsigned int id = 0x0EF;
@@ -143,6 +201,7 @@ float Canbus::GetTriggerDac1(float VREF)
 	}
 }
 
+//----check-----
 int Canbus::SetTriggerDac0(float threshold, float VREF)
 {
 	unsigned int id = 0x0AB;
@@ -223,6 +282,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	return retval;
 }
 
+//----check-----
 int Canbus::SetTriggerDac1(float threshold, float VREF)
 {
 	unsigned int id = 0x0DE;
@@ -303,20 +363,26 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	return retval;
 }
 
+
+//Gets the readout from the temperature &
+//humidity sensor as a vector {Temp,Humi}
+//returns 
+//{-n} for fails
+// vector for data
 vector<float> Canbus::GetTemp()
 { 	
-	vector<float> RHT;
+	vector<float> RHT = {-1};
 	unsigned int id = 0x123;
 	unsigned long long msg = 0x0000000000000000;
 
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "RHT: Wrong format!\n\n");
-		return {2};
+		return {-2};
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "RHT: Write error!\n\n");
-		return {3};
+		return {-3};
 	}
 
 	//Recieve sensor data 
@@ -327,7 +393,7 @@ vector<float> Canbus::GetTemp()
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "HV: Read error!\n\n");	
-			return {4};
+			return {-4};
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
@@ -357,14 +423,14 @@ vector<float> Canbus::GetTemp()
 		float T = (temp_hex/(pow(2,14)-2))*165-40;
 		float H = (hum_hex/(pow(2,14)-2))*100;
 
-		RHT.push_back(T);
-		RHT.push_back(H);
+		RHT[0] = (T);
+		RHT[1] = (H);
 
 		cout << "H=" << H << " T=" << T << endl; 
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after RHT check\n");
-		return {5};
+		return {-5};
 	}
 
 	return RHT;
@@ -374,8 +440,7 @@ vector<float> Canbus::GetTemp()
 //returns:
 //0: false = off
 //1: true = on
-//2: error on create message
-//3: error on write
+//-n: fail
 int Canbus::SetHV_ONOFF(bool state){ 
 	unsigned int id;
 	unsigned long long msg;
@@ -394,11 +459,11 @@ int Canbus::SetHV_ONOFF(bool state){
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "HV: Wrong format!\n\n");
-		return 2;
+		return -2;
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "HV: Write error!\n\n");
-		return 3;
+		return -3;
 	}
 
 	//Recieve sensor data 
@@ -409,7 +474,7 @@ int Canbus::SetHV_ONOFF(bool state){
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "HV: Read error!\n\n");	
-			return 4;
+			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
@@ -433,7 +498,7 @@ int Canbus::SetHV_ONOFF(bool state){
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
-			return 5;	
+			return -5;	
 		}
 	}else if(retID == 0x031)
 	{
@@ -443,12 +508,12 @@ int Canbus::SetHV_ONOFF(bool state){
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
-			return 5;	
+			return -5;	
 		}
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after HV check\n");
-		return 5;
+		return -6;
 	}
 
 	return retval;
@@ -456,13 +521,11 @@ int Canbus::SetHV_ONOFF(bool state){
 
 //sends a can message to set the HV voltage
 //returns:
-//0: false = done with fail
-//1: true = done successfully
-//2: error on create message
-//3: error on write
+//0: false = done successfully
+//-n: fail
 int Canbus::SetHV_voltage(float volts){ 
 
-	int retval=1;
+	int retval=0;
 	float sign = -1.0;
 	float v_pre, v_tmp, v_diff, vset, vpct, dac_vout;
 	unsigned int id;
@@ -479,12 +542,12 @@ int Canbus::SetHV_voltage(float volts){
 
 	//take volts from input and 
 	v_pre = get_HV_volts;
-    if (volts > v_pre)
-    {
-      sign = 1.0;
-    }	
-    v_tmp = v_pre;
-    v_diff = abs(volts-v_tmp);
+	if (volts > v_pre)
+	{
+		sign = 1.0;
+	}	
+	v_tmp = v_pre;
+	v_diff = abs(volts-v_tmp);
     
 	while(v_tmp != volts)
 	{
@@ -524,16 +587,15 @@ int Canbus::SetHV_voltage(float volts){
 		if(createCanFrame(id,msg,&frame)!=0)
 		{
 			fprintf(stderr, "HV: Wrong format!\n\n");
-			return 2;
+			return -2;
 		}
 		if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) 
 		{
 			fprintf(stderr, "HV: Write error!\n\n");
-			return 3;
+			return -3;
 		}
 		usleep(1000);
 	}
-
 	return retval;
 }
 
@@ -544,24 +606,20 @@ int Canbus::SetHV_voltage(float volts){
 //returns:
 //0: false = off
 //1: true = on
-//2: error on create message
-//3: error on write
-//4: error on read
-//5: error on message interprete
-//6: Why?
+//-n: fail
 int Canbus::GetHV_ONOFF(){ 
 	unsigned int id = 0x042;
 	unsigned long long msg = 0x0000BEEFDEAD0000;
-	int HV_state=6;
+	int HV_state=-1;
 	
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "HV: Wrong format!\n\n");
-		return 2;
+		return -2;
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "HV: Write error!\n\n");
-		return 3;
+		return -3;
 	}
 		
 	//Recieve sensor data 
@@ -572,7 +630,7 @@ int Canbus::GetHV_ONOFF(){
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "HV: Read error!\n\n");	
-			return 4;
+			return -4;
 		}
 
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
@@ -600,12 +658,12 @@ int Canbus::GetHV_ONOFF(){
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
-			return 5;	
+			return -5;	
 		}
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after HV check\n");
-		return 5;
+		return -6;
 	}
 
 	return HV_state;
@@ -615,15 +673,11 @@ int Canbus::GetHV_ONOFF(){
 //returns:
 //0: false = off
 //1: true = on
-//2: error on create message
-//3: error on write
-//4: error on read
-//5: error on message interprete
-//6: Why?
+//-n: fail
 int Canbus::SetLV(bool state){ 
 	unsigned int id;
 	unsigned long long msg;
-	int retval;
+	int retval=-1;
 	
 	if(state==true){
 		id = 0x020;
@@ -638,11 +692,11 @@ int Canbus::SetLV(bool state){
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "LV: Wrong format!\n\n");
-		return 2;
+		return -2;
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "LV: Write error!\n\n");
-		return 3;
+		return -3;
 	}
 
 	//Recieve sensor data 
@@ -653,7 +707,7 @@ int Canbus::SetLV(bool state){
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "LV: Read error!\n\n");	
-			return 4;
+			return -4;
 		}
 
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
@@ -678,7 +732,7 @@ int Canbus::SetLV(bool state){
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
-			return 5;	
+			return -5;	
 		}
 	}else if(retID == 0x011)
 	{
@@ -688,12 +742,12 @@ int Canbus::SetLV(bool state){
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
-			return 5;	
+			return -5;	
 		}
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after LV check\n");
-		return 5;
+		return -6;
 	}
 
 	return retval;
@@ -703,24 +757,20 @@ int Canbus::SetLV(bool state){
 //returns:
 //0: false = off
 //1: true = on
-//2: error on create message
-//3: error on write
-//4: error on read
-//5: error on message interprete
-//6: Why?
+//-n: fail
 int Canbus::GetLV_ONOFF(){ 
 	unsigned int id = 0x022;
 	unsigned long long msg = 0x0000DEADBEEF0000;
-	int LV_state=6;
+	int LV_state=-1;
 	
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "LV: Wrong format!\n\n");
-		return 2;
+		return -2;
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "LV: Write error!\n\n");
-		return 3;
+		return -3;
 	}
 		
 	//Recieve sensor data 
@@ -731,7 +781,7 @@ int Canbus::GetLV_ONOFF(){
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "LV: Read error!\n\n");	
-			return 4;
+			return -4;
 		}
 
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
@@ -759,12 +809,12 @@ int Canbus::GetLV_ONOFF(){
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
-			return 5;	
+			return -5;	
 		}
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after LV check\n");
-		return 5;
+		return -6;
 	}
 
 	return LV_state;
@@ -783,11 +833,11 @@ vector<float> Canbus::GetLV_voltage(){
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "LV: Wrong format!\n\n");
-		return 2;
+		return {-2};
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "LV: Write error!\n\n");
-		return 3;
+		return {-3};
 	}
 		
 	//Recieve sensor data 
@@ -798,7 +848,7 @@ vector<float> Canbus::GetLV_voltage(){
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "LV: Read error!\n\n");	
-			return 4;
+			return {-4};
 		}
 
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
@@ -839,19 +889,23 @@ vector<float> Canbus::GetLV_voltage(){
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after LV check\n");
-		return 5;
+		return {-5};
 	}
 
 	return volts;
 }
 
+
+//Sets the relay and checks for success
+//0: successful turn off
+//1: successful turn on
 int Canbus::SetRelay(int idx, bool state){
 	wiringPiSetup();
 	pinMode(RLY1, OUTPUT);
 	pinMode(RLY2, OUTPUT);
 	pinMode(RLY3, OUTPUT);
 	int ch;
-	int status;
+	int status=-1;
 
 	switch(idx){
 		case 1:
@@ -865,10 +919,11 @@ int Canbus::SetRelay(int idx, bool state){
 			break;
 		default :
 			printf(" Invalid relay channel! \n");
-			return 2;
+			return -2;
 	}
 	
 	digitalWrite(ch, state);
+	usleep(1000);
 	if((digitalRead(ch)) == state)
 	{
 		if(state==true){
@@ -879,11 +934,16 @@ int Canbus::SetRelay(int idx, bool state){
 		printf("Relay %d\n", idx);
 	}else 
 	{
-		return 3;
+		return -3;
 	}
-
+	
+	return status;
 }
 
+
+//Gets relay status
+//true: ON
+//false: OFF
 bool Canbus::GetRelayState(int idx){
 	wiringPiSetup();
 	pinMode(RLY1, OUTPUT);
