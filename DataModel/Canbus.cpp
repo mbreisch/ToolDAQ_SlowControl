@@ -69,7 +69,7 @@ float Canbus::GetPhotodiode()
 	if(retID == 0x0D0)
 	{
 		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
-		light = ...*lighth;
+		light = 404;//(...*lighth;
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after DAC0 check\n");
@@ -861,17 +861,17 @@ vector<float> Canbus::GetLV_voltage(){
 		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
 		unsigned int v12h = (retMSG & 0x000000000000FFFF);
 		
-		v33 = ... *v33h;
+		v33 = 404;//... *v33h;
 		if(v33>=0)
 		{
 			volts[0] = (v33);
 		}
-		v25 = ... *v25h;
+		v25 = 404;//... *v25h;
 		if(v25>=0)
 		{
 			volts[1] = (v25);
 		}
-		v12 = ... *v12h;
+		v12 = 404;//... *v12h;
 		if(v12>=0)
 		{
 			volts[2] = (v12);
