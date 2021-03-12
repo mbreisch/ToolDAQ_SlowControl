@@ -361,18 +361,18 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 // vector for data
 vector<float> Canbus::GetTemp()
 { 	
-	vector<float> RHT = {-1};
+	vector<float> RHT = {-1,-1};
 	unsigned int id = 0x123;
 	unsigned long long msg = 0x0000000000000000;
 
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "RHT: Wrong format!\n\n");
-		return {-2};
+		return {-2,-2};
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "RHT: Write error!\n\n");
-		return {-3};
+		return {-3,-3};
 	}
 
 	//Recieve sensor data 
@@ -383,7 +383,7 @@ vector<float> Canbus::GetTemp()
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "HV: Read error!\n\n");	
-			return {-4};
+			return {-4,-4};
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
@@ -420,7 +420,7 @@ vector<float> Canbus::GetTemp()
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after RHT check\n");
-		return {-5};
+		return {-5,-5};
 	}
 
 	return RHT;
@@ -823,11 +823,11 @@ vector<float> Canbus::GetLV_voltage(){
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
 		fprintf(stderr, "LV: Wrong format!\n\n");
-		return {-2};
+		return {-2,-2,-2};
 	}
 	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "LV: Write error!\n\n");
-		return {-3};
+		return {-3,-3,-3};
 	}
 		
 	//Recieve sensor data 
@@ -838,7 +838,7 @@ vector<float> Canbus::GetLV_voltage(){
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "LV: Read error!\n\n");	
-			return {-4};
+			return {-4,-4,-4};
 		}
 
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
@@ -879,7 +879,7 @@ vector<float> Canbus::GetLV_voltage(){
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after LV check\n");
-		return {-5};
+		return {-5,-5,-5};
 	}
 
 	return volts;
