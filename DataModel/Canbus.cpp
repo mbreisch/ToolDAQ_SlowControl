@@ -896,6 +896,14 @@ int Canbus::SetRelay(int idx, bool state){
 	pinMode(RLY3, OUTPUT);
 	int ch;
 	int status=-1;
+	int stateInt;
+	
+	if(state==true)
+	{
+		stateInt = 1;
+	}else{
+		stateInt = 0;
+	}
 
 	switch(idx){
 		case 1:
@@ -912,15 +920,11 @@ int Canbus::SetRelay(int idx, bool state){
 			return -2;
 	}
 	
-	digitalWrite(ch, state);
+	digitalWrite(ch, stateInt);
 	usleep(1000);
-	if((digitalRead(ch)) == state)
+	if((digitalRead(ch)) == stateInt)
 	{
-		if(state==true){
-			return 1;
-		}else{
-			return 0;
-		}
+		return stateInt;
 		printf("Relay %d\n", idx);
 	}else 
 	{
@@ -940,7 +944,7 @@ bool Canbus::GetRelayState(int idx){
 	pinMode(RLY2, OUTPUT);
 	pinMode(RLY3, OUTPUT);
 	int ch;
-	bool retval = false;
+	int retval = 0;
 
 	switch(idx){
 		case 1:
@@ -957,7 +961,13 @@ bool Canbus::GetRelayState(int idx){
 			return retval;
 	}
 	retval = digitalRead(ch);
-
+	if(retval==0)
+	{
+		return false;
+	}else if(retval==1)
+	{
+		return true;
+	}
 	return retval;
 }
 
