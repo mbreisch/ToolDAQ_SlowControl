@@ -85,7 +85,7 @@ bool Set::Execute(){
     if(m_data->SCMonitor.HV_volts!=m_data->CB->get_HV_volts)
     {
       retval = m_data->CB->SetHV_voltage(m_data->SCMonitor.HV_volts);
-      if(retval==1)
+      if(retval==0)
       {
         m_data->CB->get_HV_volts = m_data->SCMonitor.HV_volts;
 	std::fstream outfile("./configfiles/LastHV.txt", std::ios_base::out | std::ios_base::trunc);
