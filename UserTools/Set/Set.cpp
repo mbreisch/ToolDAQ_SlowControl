@@ -69,9 +69,16 @@ bool Set::Execute(){
     m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
   }
 	
+  std::cout << "Let's ";
   if(m_data->SCMonitor.recieveFlag==0 || m_data->SCMonitor.recieveFlag==1)
   {
-    //------------------------------------Relay Control
+    std::cout << "start the setup!" << std::endl;
+    
+  	//------------------------------------Relay 1 Control
+  	std::cout << "Do you want to turn Relay 1 on/off? 0:OFF , 1:ON | " ;
+  	std::cin >> m_data->SCMonitor.relayCh1;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+    m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
     if(m_data->SCMonitor.relayCh1!=m_data->SCMonitor.relayCh1_mon)
     {
       retval = m_data->CB->SetRelay(1,m_data->SCMonitor.relayCh1);
@@ -81,6 +88,11 @@ bool Set::Execute(){
       }
     }
 
+	//------------------------------------Relay 2 Control
+  	std::cout << "Do you want to turn Relay 2 on/off? 0:OFF , 1:ON | " ;
+  	std::cin >> m_data->SCMonitor.relayCh2;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+    m_data->SCMonitor.relayCh2_mon = m_data->CB->GetRelayState(2);
     if(m_data->SCMonitor.relayCh2!=m_data->SCMonitor.relayCh2_mon)
     {
       retval = m_data->CB->SetRelay(2,m_data->SCMonitor.relayCh2);
@@ -90,6 +102,11 @@ bool Set::Execute(){
       }
     }
 
+	//------------------------------------Relay 3 Control
+	std::cout << "Do you want to turn Relay 3 on/off? 0:OFF , 1:ON | " ;
+  	std::cin >> m_data->SCMonitor.relayCh3;
+	cin.ignore(numeric_limits<streamsize>::max(),'\n');
+    m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
     if(m_data->SCMonitor.relayCh3!=m_data->SCMonitor.relayCh3_mon)
     {
       retval = m_data->CB->SetRelay(3,m_data->SCMonitor.relayCh3);
@@ -101,6 +118,9 @@ bool Set::Execute(){
     
     usleep(10000);
     //------------------------------------LV Control
+    std::cout << "Do you want to turn LV on/off? 0:OFF , 1:ON | " ;
+  	std::cin >> m_data->SCMonitor.LV_state_set;
+	  cin.ignore(numeric_limits<streamsize>::max(),'\n');
     bool tempLVmon;
     int tCB_LV = m_data->CB->GetLV_ONOFF();
     if(tCB_LV==0)
@@ -123,6 +143,9 @@ bool Set::Execute(){
     
     
     //------------------------------------HV Control
+    std::cout << "Do you want to turn HV on/off? 0:OFF , 1:ON | " ;
+  	std::cin >> m_data->SCMonitor.HV_state_set;
+	cin.ignore(numeric_limits<streamsize>::max(),'\n');
     bool tempHVmon;
     int tCB_HV = m_data->CB->GetHV_ONOFF();
     if(tCB_HV==0)
@@ -143,6 +166,12 @@ bool Set::Execute(){
       }
     }
 
+    if(m_data->SCMonitor.HV_state_set==true)
+    {
+	    std::cout << "What value do you want to set the HV to in [V]? | " ;
+	  	std::cin >> m_data->SCMonitor.HV_volts;
+		cin.ignore(numeric_limits<streamsize>::max(),'\n');
+	}
     if(m_data->SCMonitor.HV_volts!=m_data->CB->get_HV_volts)
     {
       retval = m_data->CB->SetHV_voltage(m_data->SCMonitor.HV_volts);
@@ -160,6 +189,13 @@ bool Set::Execute(){
 
 
     //------------------------------------Triggerboard Control
+
+    std::cout << "What value is the triggerboard reference value in [V]? | " ;
+  	std::cin >> m_data->SCMonitor.TrigVref;
+	cin.ignore(numeric_limits<streamsize>::max(),'\n');
+	std::cout << "What value is the triggerboard threshold value for DAC0 in [V]? | " ;
+  	std::cin >> m_data->SCMonitor.Trig0_threshold;
+	cin.ignore(numeric_limits<streamsize>::max(),'\n');
     if(m_data->SCMonitor.Trig0_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
     {
       retval = m_data->CB->SetTriggerDac0(m_data->SCMonitor.Trig0_threshold, m_data->SCMonitor.TrigVref);
@@ -169,6 +205,10 @@ bool Set::Execute(){
       }
     }
 
+
+	std::cout << "What value is the triggerboard threshold value for DAC1 in [V]? | " ;
+  	std::cin >> m_data->SCMonitor.Trig1_threshold;
+	cin.ignore(numeric_limits<streamsize>::max(),'\n');
     if(m_data->SCMonitor.Trig1_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
     {
       retval = m_data->CB->SetTriggerDac1(m_data->SCMonitor.Trig1_threshold, m_data->SCMonitor.TrigVref);
