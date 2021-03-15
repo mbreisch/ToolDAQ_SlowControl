@@ -102,11 +102,12 @@ bool Set::Execute(){
     
     //------------------------------------LV Control
     bool tempLVmon;
-    if(m_data->CB->GetLV_ONOFF()==0)
+    int tCB_LV = m_data->CB->GetLV_ONOFF();
+    if(tCB_LV==0)
     {
       tempLVmon = false;
       m_data->SCMonitor.LV_mon = 0;
-    }else if(m_data->CB->GetLV_ONOFF()==1)
+    }else if(tCB_LV==1)
     {
       tempLVmon = true;
       m_data->SCMonitor.LV_mon = 1;
@@ -123,11 +124,12 @@ bool Set::Execute(){
     
     //------------------------------------HV Control
     bool tempHVmon;
-    if(m_data->CB->GetHV_ONOFF()==0)
+    int tCB_HV = m_data->CB->GetHV_ONOFF();
+    if(tCB_HV==0)
     {
       tempHVmon = false;
       m_data->SCMonitor.HV_mon = 0;
-    }else if(m_data->CB->GetHV_ONOFF()==1)
+    }else if(tCB_HV==1)
     {
       tempHVmon = true;
       m_data->SCMonitor.HV_mon = 1;
