@@ -721,7 +721,7 @@ int Canbus::SetLV(bool state){
 			return 1;
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense!\n");
+			fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
 			return -5;	
 		}
 	}else if(retID == 0x011)
@@ -731,7 +731,7 @@ int Canbus::SetLV(bool state){
 			return 0;
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense!\n");
+			fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
 			return -5;	
 		}
 	}else
@@ -798,7 +798,7 @@ int Canbus::GetLV_ONOFF(){
 			return 1;
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense!\n");
+			fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
 			return -5;	
 		}
 	}else
