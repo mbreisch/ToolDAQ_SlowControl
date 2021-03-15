@@ -215,7 +215,8 @@ public:
 	  {
 	    ch_msg[i] = response[i+4];
 	  }
-	  retMSG = strtoul(ch_msg,nullptr,16);
+	  ch_msg[16] = '\0';
+	  retMSG = strtoull(ch_msg,nullptr,16);
 
 	  return retMSG;
 	}
