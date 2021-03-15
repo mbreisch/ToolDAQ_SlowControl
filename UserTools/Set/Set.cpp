@@ -99,7 +99,7 @@ bool Set::Execute(){
       }
     }  
     
-    
+    usleep(10000);
     //------------------------------------LV Control
     bool tempLVmon;
     int tCB_LV = m_data->CB->GetLV_ONOFF();
