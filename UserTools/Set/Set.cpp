@@ -189,7 +189,7 @@ bool Set::Execute(){
 
 
     //------------------------------------Triggerboard Control
-
+	/*
     std::cout << "What value is the triggerboard reference value in [V]? | " ;
   	std::cin >> m_data->SCMonitor.TrigVref;
 	cin.ignore(numeric_limits<streamsize>::max(),'\n');
@@ -217,7 +217,7 @@ bool Set::Execute(){
         std::cout << " There was an error (DAC1) with retval: " << retval << std::endl;
       }
     } 
-    
+    */
     m_data->SCMonitor.recieveFlag=2;
   }
   return true;
