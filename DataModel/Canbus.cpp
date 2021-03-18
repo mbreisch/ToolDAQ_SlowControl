@@ -45,48 +45,45 @@ float Canbus::GetPhotodiode()
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
+	char *rec_message; rec_message = (char*) malloc(256
+
 	unsigned int num;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return -4;
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
+			return {-6,-6};;
 		}
-		
-		if(retID == 0x0D0)
-		{
-			unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
-			light = lighth*5/1000;
-			return light;
-		}else
-		{
-			counter++;	
-		}	
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+		
+	if(retID == 0x0D0)
+	{
+		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
+		light = lighth*5/1000;
+		return light;
+	}else
+	{
+		counter++;	
+	}	
+	
 			
 	return -7;	
 }
@@ -110,7 +107,7 @@ float Canbus::GetTriggerDac0(float VREF)
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
+	char *rec_message; rec_message = (char*) malloc(256);
 	nbytes=0;
 	int counter = 0;
 	unsigned int retID;
@@ -147,7 +144,8 @@ float Canbus::GetTriggerDac0(float VREF)
 			}
 		}else
 		{
-			counter++;		
+			fprintf(stderr, "No response from LVHV after DAC1 check\n");
+			return -6;
 		}
 	}
 	
@@ -408,64 +406,63 @@ vector<float> Canbus::GetTemp()
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
+	char *rec_message; rec_message = (char*) malloc(256);
+
 	unsigned int num;
 	unsigned long long t_temp;
 	unsigned int temp_hex;
 	unsigned long long t_hum;
 	unsigned int hum_hex;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return {-4,-4};
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
+			return {-6,-6};;
 		}
-
-
-		if(retID == 0x321)
-		{
-			t_temp = retMSG & 0x0000FFFC00000000;
-			temp_hex = t_temp >> 32;
-			t_hum = retMSG & 0x3FFF000000000000;
-			hum_hex = t_hum >> 48;
-
-			float T = (temp_hex/(pow(2,14)-2))*165-40;
-			float H = (hum_hex/(pow(2,14)-2))*100;
-
-			RHT[0] = (T);
-			RHT[1] = (H);
-
-			cout << "H=" << H << " T=" << T << endl; 
-			
-			return RHT;
-		}else
-		{
-			counter++;
-		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+
+	if(retID == 0x321)
+	{
+		t_temp = retMSG & 0x0000FFFC00000000;
+		temp_hex = t_temp >> 32;
+		t_hum = retMSG & 0x3FFF000000000000;
+		hum_hex = t_hum >> 48;
+
+		float T = (temp_hex/(pow(2,14)-2))*165-40;
+		float H = (hum_hex/(pow(2,14)-2))*100;
+
+		RHT[0] = (T);
+		RHT[1] = (H);
+
+		cout << "H=" << H << " T=" << T << endl; 
+
+		return RHT;
+	}else
+	{
+		fprintf(stderr, "Response doesn't make sense!\n");
+		return {-6,-6};
+	}
+
 	return {-7,-7};
 }
 
@@ -502,62 +499,59 @@ int Canbus::SetHV_ONOFF(bool state){
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	char *rec_message; rec_message = (char*) malloc(256);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
 		}
-		
-		if(retID == 0x041)
-		{	
-			if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense!\n");
-				return -5;	
-			}
-		}else if(retID == 0x031)
-		{
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense!\n");
-				return -5;	
-			}
-		}else
-		{
-			counter++;
-		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+		
+	if(retID == 0x041)
+	{	
+		if(retMSG == 0x0001000100010001)
+		{
+			return 1;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense!\n");
+			return -5;	
+		}
+	}else if(retID == 0x031)
+	{
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense!\n");
+			return -5;	
+		}
+	}else
+	{
+		fprintf(stderr, "Response doesn't make sense!\n");
+		return -6;
+	}
+
 	return -7;
 }
 
@@ -667,55 +661,52 @@ int Canbus::GetHV_ONOFF(){
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	char *rec_message; rec_message = (char*) malloc(256);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
 		}
-
-		if(retID == 0x420)
-		{	
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense!\n");
-				return -5;	
-			}
-		}else
-		{
-			counter++;
-		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+	       
+	if(retID == 0x420)
+	{	
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else if(retMSG == 0x0001000100010001)
+		{
+			return 1;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense!\n");
+			return -5;	
+		}
+	}else
+	{
+		fprintf(stderr, "Response doesn't make sense!\n");
+		return -6;
+	}
+	
 	return -7;
 }
 
@@ -752,62 +743,59 @@ int Canbus::SetLV(bool state){
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	char *rec_message; rec_message = (char*) malloc(256);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
 		}
-
-		if(retID == 0x021)
-		{	
-			if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
-				return -5;	
-			}
-		}else if(retID == 0x011)
-		{
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
-				return -5;	
-			}
-		}else
-		{
-			counter++;
-		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+	       
+	if(retID == 0x021)
+	{	
+		if(retMSG == 0x0001000100010001)
+		{
+			return 1;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
+			return -5;	
+		}
+	}else if(retID == 0x011)
+	{
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
+			return -5;	
+		}
+	}else
+	{
+		fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
+		return -6;	
+	}
+
 	return -7;
 }
 
@@ -834,55 +822,52 @@ int Canbus::GetLV_ONOFF(){
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	char *rec_message; rec_message = (char*) malloc(256);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
 		}
-
-		if(retID == 0x220)
-		{	
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
-				return -5;	
-			}
-		}else
-		{
-			counter++;
-		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+	       
+	if(retID == 0x220)
+	{	
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else if(retMSG == 0x0001000100010001)
+		{
+			return 1;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
+			return -5;	
+		}
+	}else
+	{
+		fprintf(stderr, "Response ID doesn't make sense! (LV get 220#)\n");
+		return -6;
+	}
+
 	return -7;
 }
 
@@ -909,64 +894,61 @@ vector<float> Canbus::GetLV_voltage(){
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
-		nbytes = read(s, &frame, sizeof(struct can_frame));
-		if(nbytes<0){
+	char *rec_message; rec_message = (char*) malloc(256);
+	nbytes=0;
+	while(nbytes<=0){
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return {-4,-4,-4};
-		}else if(nbytes > 0)
-		{
-			sprintf(rec_id,"%03X%c",frame.can_id,'#');
-			rec_id[5] = '\0';
-			strcpy(rec_message,rec_id);
-			num =  frame.can_dlc;
-			for (int i = 0; i < num; i++){
-				sprintf(rec_temp,"%02X",frame.data[i]);
-				strcat(rec_message,rec_temp);
-			}		
-
-
-			//back parse message to state
-			retID = parseResponseID(rec_message);
-			retMSG = parseResponseMSG(rec_message);	
-		}else
-		{
-			continue;
 		}
-
-		if(retID == 0x3DA)
-		{	
-			unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
-			unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
-			unsigned int v12h = (retMSG & 0x000000000000FFFF);
-
-			v33 = v33h*5/1000;;
-			if(v33>=0)
-			{
-				volts[0] = (v33);
-			}
-			v25 = v25h*5/1000;
-			if(v25>=0)
-			{
-				volts[1] = (v25);
-			}
-			v12 = v12h*5/1000;
-			if(v12>=0)
-			{
-				volts[2] = (v12);
-			}
-			return volts;
-		}else
-		{
-			counter++;
-		}
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[5] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.can_dlc;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}		
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n, rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x3DA)
+	{	
+		unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
+		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
+		unsigned int v12h = (retMSG & 0x000000000000FFFF);
+
+		v33 = v33h*5/1000;;
+		if(v33>=0)
+		{
+			volts[0] = (v33);
+		}
+		v25 = v25h*5/1000;
+		if(v25>=0)
+		{
+			volts[1] = (v25);
+		}
+		v12 = v12h*5/1000;
+		if(v12>=0)
+		{
+			volts[2] = (v12);
+		}
+		return volts;
+	}else
+	{
+		fprintf(stderr, "Response ID doesn't make sense!\n");
+		return {-6,-6,-6};
+	}
+
 	return {-7,-7,-7};
 }
 
