@@ -25,10 +25,10 @@ bool Poll::Execute(){
   m_data->SCMonitor.LV_mon = LVstate;
 
   
-  std::vector<float> LVvoltage = m_data->CB->GetLV_voltage();
-  m_data->SCMonitor.v33 = LVvoltage[0];
-  m_data->SCMonitor.v25 = LVvoltage[1];
-  m_data->SCMonitor.v12 = LVvoltage[2];
+  //std::vector<float> LVvoltage = m_data->CB->GetLV_voltage();
+  //m_data->SCMonitor.v33 = LVvoltage[0];
+  //m_data->SCMonitor.v25 = LVvoltage[1];
+  //m_data->SCMonitor.v12 = LVvoltage[2];
 
   //HV
   //int HVstate = m_data->CB->GetHV_ONOFF();
@@ -41,10 +41,10 @@ bool Poll::Execute(){
   m_data->SCMonitor.humidity_mon = RHT[1];
   
   //DAC0
-  m_data->SCMonitor.Trig0_mon = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
+  //m_data->SCMonitor.Trig0_mon = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
 
   //DAC1
-  m_data->SCMonitor.Trig1_mon = m_data->CB->GetTriggerDac1(m_data->SCMonitor.TrigVref);
+  //m_data->SCMonitor.Trig1_mon = m_data->CB->GetTriggerDac1(m_data->SCMonitor.TrigVref);
 
   //Relay
   m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
@@ -52,7 +52,7 @@ bool Poll::Execute(){
   m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
   
   //Photodiode
-  m_data->SCMonitor.light = m_data->CB->GetPhotodiode();
+  //m_data->SCMonitor.light = m_data->CB->GetPhotodiode();
 
   return true;
 }
