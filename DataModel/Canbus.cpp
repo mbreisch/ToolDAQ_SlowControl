@@ -208,7 +208,8 @@ float Canbus::GetTriggerDac1(float VREF)
 			}
 		}else
 		{
-			counter++;
+			fprintf(stderr, "No response from LVHV after DAC1 check\n");
+			return -6;	
 		}
 	}
 	return -7;
