@@ -844,8 +844,7 @@ int Canbus::GetLV_ONOFF(){
 			}
 		}else
 		{
-			fprintf(stderr, "No response from LVHV after LV check\n");
-			return -6;
+			counter++;
 		}
 	}
 	return -7;
