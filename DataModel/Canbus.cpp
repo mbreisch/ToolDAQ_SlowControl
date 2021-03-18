@@ -6,6 +6,9 @@ bool Canbus::Connect(){
 	s = socket(PF_CAN,SOCK_RAW,CAN_RAW);
 	memset(&addr, 0, sizeof(addr));
 	
+	int canfd_enabled = 1;
+	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_enabled, sizeof(int));
+	
 	strcpy(ifr.ifr_name, "can0");
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	
