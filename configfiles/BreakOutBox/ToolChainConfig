@@ -24,7 +24,7 @@ service_kick_sec -1
 Tools_File configfiles/BreakOutBox/ToolsConfig
 
 ##### Run Type #####
-Inline 1
+Inline -1
 Interactive 0
 Remote 0
 
