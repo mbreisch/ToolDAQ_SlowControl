@@ -106,39 +106,46 @@ float Canbus::GetTriggerDac0(float VREF)
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return 4;
+			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	if(retID == 0x0CB)
-	{
-		if((retMSG>>56)==0xC0)
+		if(retID == 0x0CB)
 		{
-			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-			float result = value*VREF/4095;
+			if((retMSG>>56)==0xC0)
+			{
+				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+				float result = value*VREF/4095;
 
-			return result;
+				return result;
+			}
+		}else
+		{
+			counter++;		
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after DAC0 check\n");
-		return 5;		
 	}
+	
+	return -7;
 }
 
 //----check-----
@@ -162,39 +169,45 @@ float Canbus::GetTriggerDac1(float VREF)
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC1: Read error!\n\n");	
-			return 4;
+			fprintf(stderr, "DAC0: Read error!\n\n");	
+			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	if(retID == 0x0FE)
-	{
-		if((retMSG>>56)==0xC0)
+		if(retID == 0x0FE)
 		{
-			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-			float result = value*VREF/4095;
+			if((retMSG>>56)==0xC0)
+			{
+				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+				float result = value*VREF/4095;
 
-			return result;
+				return result;
+			}
+		}else
+		{
+			counter++;
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after DAC1 check\n");
-		return 5;		
 	}
+	return -7;
 }
 
 //----check-----
@@ -234,48 +247,53 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return 4;
+			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	//Analize response
-	if(retID == 0x0BA)
-	{
-		if((retMSG>>56)==0xC0)
+		//Analize response
+		if(retID == 0x0BA)
 		{
-			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-			float result = value*VREF/4095;
-			if(result == threshold)
+			if((retMSG>>56)==0xC0)
 			{
-				return 0;
-			}else
-			{
-				std::cout << "Result was " << result << std::endl;
-				return 6;
+				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+				float result = value*VREF/4095;
+				if(result == threshold)
+				{
+					return 0;
+				}else
+				{
+					std::cout << "Result was " << result << std::endl;
+					return -6;
+				}
 			}
+		}else
+		{
+			counter++;		
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after DAC0 check\n");
-		return 5;		
 	}
 
-	return retval;
+	return -7;
 }
 
 //----check-----
@@ -386,50 +404,57 @@ vector<float> Canbus::GetTemp()
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	unsigned long long t_temp;
+	unsigned int temp_hex;
+	unsigned long long t_hum;
+	unsigned int hum_hex;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "HV: Read error!\n\n");	
+			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return {-4,-4};
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
-	unsigned long long t_temp;
-	unsigned int temp_hex;
-	unsigned long long t_hum;
-	unsigned int hum_hex;
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	if(retID == 0x321)
-	{
-		t_temp = retMSG & 0x0000FFFC00000000;
-		temp_hex = t_temp >> 32;
-		t_hum = retMSG & 0x3FFF000000000000;
-		hum_hex = t_hum >> 48;
 
-		float T = (temp_hex/(pow(2,14)-2))*165-40;
-		float H = (hum_hex/(pow(2,14)-2))*100;
+		if(retID == 0x321)
+		{
+			t_temp = retMSG & 0x0000FFFC00000000;
+			temp_hex = t_temp >> 32;
+			t_hum = retMSG & 0x3FFF000000000000;
+			hum_hex = t_hum >> 48;
 
-		RHT[0] = (T);
-		RHT[1] = (H);
+			float T = (temp_hex/(pow(2,14)-2))*165-40;
+			float H = (hum_hex/(pow(2,14)-2))*100;
 
-		cout << "H=" << H << " T=" << T << endl; 
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after RHT check\n");
-		return {-5,-5};
-	}
+			RHT[0] = (T);
+			RHT[1] = (H);
 
-	return RHT;
+			cout << "H=" << H << " T=" << T << endl; 
+			
+			return RHT;
+		}else
+		{
+			counter++;
+		}
+
+	return {-7,-7};
 }
 
 //sends a can message to turn on/off the HV
@@ -466,53 +491,56 @@ int Canbus::SetHV_ONOFF(bool state){
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "HV: Read error!\n\n");	
+			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	if(retID == 0x041)
-	{	
-		if(retMSG == 0x0001000100010001)
+		if(retID == 0x041)
+		{	
+			if(retMSG == 0x0001000100010001)
+			{
+				return 1;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense!\n");
+				return -5;	
+			}
+		}else if(retID == 0x031)
 		{
-			return 1;
+			if(retMSG == 0x0000000000000000)
+			{
+				return 0;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense!\n");
+				return -5;	
+			}
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense!\n");
-			return -5;	
+			counter++;
 		}
-	}else if(retID == 0x031)
-	{
-		if(retMSG == 0x0000000000000000)
-		{
-			return 0;
-		}else
-		{
-			fprintf(stderr, "Response doesn't make sense!\n");
-			return -5;	
-		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after HV check\n");
-		return -6;
 	}
-
-	return retval;
+	return -7;
 }
 
 //sends a can message to set the HV voltage
@@ -622,47 +650,49 @@ int Canbus::GetHV_ONOFF(){
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "HV: Read error!\n\n");	
+			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
 		}
-
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
 	
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	if(retID == 0x420)
-	{	
-		if(retMSG == 0x0000000000000000)
-		{
-			return 0;
-		}else if(retMSG == 0x0001000100010001)
-		{
-			return 1;
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
+
+		if(retID == 0x420)
+		{	
+			if(retMSG == 0x0000000000000000)
+			{
+				return 0;
+			}else if(retMSG == 0x0001000100010001)
+			{
+				return 1;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense!\n");
+				return -5;	
+			}
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense!\n");
-			return -5;	
+			counter++;
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after HV check\n");
-		return -6;
 	}
-
-	return HV_state;
+	return -7;
 }
 
 //sends a can message to turn on/off the LV
@@ -699,54 +729,56 @@ int Canbus::SetLV(bool state){
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "LV: Read error!\n\n");	
+			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
 		}
-
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	if(retID == 0x021)
-	{	
-		if(retMSG == 0x0001000100010001)
+		if(retID == 0x021)
+		{	
+			if(retMSG == 0x0001000100010001)
+			{
+				return 1;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
+				return -5;	
+			}
+		}else if(retID == 0x011)
 		{
-			return 1;
+			if(retMSG == 0x0000000000000000)
+			{
+				return 0;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
+				return -5;	
+			}
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
-			return -5;	
+			counter++;
 		}
-	}else if(retID == 0x011)
-	{
-		if(retMSG == 0x0000000000000000)
-		{
-			return 0;
-		}else
-		{
-			fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
-			return -5;	
-		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after LV check\n");
-		return -6;
 	}
-
-	return retval;
+	return -7;
 }
 
 //sends a can message to get the LV state
@@ -773,47 +805,50 @@ int Canbus::GetLV_ONOFF(){
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "LV: Read error!\n\n");	
+			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
 		}
-
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
 	
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	if(retID == 0x220)
-	{	
-		if(retMSG == 0x0000000000000000)
-		{
-			return 0;
-		}else if(retMSG == 0x0001000100010001)
-		{
-			return 1;
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
+
+		if(retID == 0x220)
+		{	
+			if(retMSG == 0x0000000000000000)
+			{
+				return 0;
+			}else if(retMSG == 0x0001000100010001)
+			{
+				return 1;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
+				return -5;	
+			}
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
-			return -5;	
+			fprintf(stderr, "No response from LVHV after LV check\n");
+			return -6;
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after LV check\n");
-		return -6;
 	}
-
-	return LV_state;
+	return -7;
 }
 
 //sends a can message to get the LV voltages
@@ -840,55 +875,58 @@ vector<float> Canbus::GetLV_voltage(){
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "LV: Read error!\n\n");	
+			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return {-4,-4,-4};
 		}
-
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
 	
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	if(retID == 0x3DA)
-	{	
-		unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
-		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
-		unsigned int v12h = (retMSG & 0x000000000000FFFF);
-		
-		v33 = v33h*5/1000;;
-		if(v33>=0)
-		{
-			volts[0] = (v33);
-		}
-		v25 = v25h*5/1000;
-		if(v25>=0)
-		{
-			volts[1] = (v25);
-		}
-		v12 = v12h*5/1000;
-		if(v12>=0)
-		{
-			volts[2] = (v12);
-		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after LV check\n");
-		return {-5,-5,-5};
-	}
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
 
-	return volts;
+		if(retID == 0x3DA)
+		{	
+			unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
+			unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
+			unsigned int v12h = (retMSG & 0x000000000000FFFF);
+
+			v33 = v33h*5/1000;;
+			if(v33>=0)
+			{
+				volts[0] = (v33);
+			}
+			v25 = v25h*5/1000;
+			if(v25>=0)
+			{
+				volts[1] = (v25);
+			}
+			v12 = v12h*5/1000;
+			if(v12>=0)
+			{
+				volts[2] = (v12);
+			}
+			return volts;
+		}else
+		{
+			counter++;
+		}
+
+	return {-7,-7,-7};
 }
 
 
