@@ -453,7 +453,7 @@ vector<float> Canbus::GetTemp()
 		{
 			counter++;
 		}
-
+	}
 	return {-7,-7};
 }
 
