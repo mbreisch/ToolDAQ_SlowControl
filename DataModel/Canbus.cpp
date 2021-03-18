@@ -799,7 +799,8 @@ int Canbus::GetLV_ONOFF(){
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(256);
 	nbytes=0;
-	while(nbytes<=0){
+	int c=0;
+	while(c<100){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "LV: Read error!\n\n");	
 			return -4;
@@ -813,37 +814,36 @@ int Canbus::GetLV_ONOFF(){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
 	
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
-	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n", rec_message);
-	printf("ID: 0x%03x\n", retID);
-	printf("MSG: 0x%0llx\n", retMSG);
-	std::cout << "----------------------------------------------" << std::endl;
+		//back parse message to state
+		unsigned int retID = parseResponseID(rec_message);
+		unsigned long long retMSG = parseResponseMSG(rec_message);
+		
+		std::cout << "--------------- Control Window----------------" << std::endl;
+		printf("%s\n", rec_message);
+		printf("ID: 0x%03x\n", retID);
+		printf("MSG: 0x%0llx\n", retMSG);
+		std::cout << "----------------------------------------------" << std::endl;
 
-	if(retID == 0x220)
-	{	
-		if(retMSG == 0x0000000000000000)
-		{
-			return 0;
-		}else if(retMSG == 0x0001000100010001)
-		{
-			return 1;
+		if(retID == 0x220)
+		{	
+			if(retMSG == 0x0000000000000000)
+			{
+				return 0;
+			}else if(retMSG == 0x0001000100010001)
+			{
+				return 1;
+			}else
+			{
+				fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
+				return -5;	
+			}
 		}else
 		{
-			fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
-			return -5;	
+			c++;
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after LV check\n");
-		return -6;
 	}
-
 	return LV_state;
 }
 
