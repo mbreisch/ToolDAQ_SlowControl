@@ -131,11 +131,14 @@ bool Set::Execute(){
     {
       tempLVmon = true;
       m_data->SCMonitor.LV_mon = 1;
-    }     
+    }else
+    {
+	    std::cout << "No read came in, retval: " << tCB_LV << std::endl;
+    }
     if(m_data->SCMonitor.LV_state_set!=tempLVmon)
     {
   	  retval = m_data->CB->SetLV(m_data->SCMonitor.LV_state_set);
-      if(retval!=0 && retval!=1)
+      	if(retval!=0 && retval!=1)
   	  {
   		  std::cout << " There was an error (Set LV) with retval: " << retval << std::endl;
   	  }
