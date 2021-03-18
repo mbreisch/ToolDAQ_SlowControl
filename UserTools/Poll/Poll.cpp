@@ -10,6 +10,7 @@ bool Poll::Initialise(std::string configfile, DataModel &data){
 
   m_data= &data;
   m_log= m_data->Log;
+  
 
   if(!m_variables.Get("verbose",m_verbose)) m_verbose=1;
 
@@ -30,8 +31,8 @@ bool Poll::Execute(){
   m_data->SCMonitor.v12 = LVvoltage[2];
 
   //HV
-  int HVstate = m_data->CB->GetHV_ONOFF();
-  m_data->SCMonitor.HV_mon = HVstate;
+  //int HVstate = m_data->CB->GetHV_ONOFF();
+  //m_data->SCMonitor.HV_mon = HVstate;
 
 
   //RHT
