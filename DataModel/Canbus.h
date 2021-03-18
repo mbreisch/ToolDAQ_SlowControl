@@ -200,6 +200,7 @@ public:
 	  {
 	    ch_id[i] = response[i];
 	  }
+	  ch_id[3] = '\0';
 	  retID = strtoul(ch_id,nullptr,16);
 
 	  return retID;
