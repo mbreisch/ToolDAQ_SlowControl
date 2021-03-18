@@ -148,6 +148,7 @@ bool Set::Execute(){
     
     
     //------------------------------------HV Control
+	  /*
     std::cout << "Do you want to turn HV on/off? 0:OFF , 1:ON | " ;
   	std::cin >> m_data->SCMonitor.HV_state_set;
 	cin.ignore(numeric_limits<streamsize>::max(),'\n');
@@ -190,7 +191,7 @@ bool Set::Execute(){
       {
         std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
       }
-    }
+    }*/
 
 
     //------------------------------------Triggerboard Control
