@@ -45,7 +45,7 @@ float Canbus::GetPhotodiode()
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(256
+	char *rec_message; rec_message = (char*) malloc(256);
 
 	unsigned int num;
 	nbytes=0;
