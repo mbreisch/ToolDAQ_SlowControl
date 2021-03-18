@@ -47,7 +47,12 @@ float Canbus::GetPhotodiode()
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	while(nbytes<=0){
+	int counter = 0;
+	unsigned int retID;
+	unsigned long long retMSG;
+	unsigned int num;
+	while(counter<1000)
+	{
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
@@ -55,28 +60,29 @@ float Canbus::GetPhotodiode()
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
+		num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	}
+	
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
-	
-	if(retID == 0x0D0)
-	{
-		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
-		light = lighth*5/1000;
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after DAC0 check\n");
-		return -5;		
-	}	
-	
-	return light;	
+		//back parse message to state
+		retID = parseResponseID(rec_message);
+		retMSG = parseResponseMSG(rec_message);	
+
+		if(retID == 0x0D0)
+		{
+			unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
+			light = lighth*5/1000;
+			return light;
+		}else
+		{
+			counter++;	
+		}	
+	}
+			
+	return -7;	
 }
 
 //----check-----
