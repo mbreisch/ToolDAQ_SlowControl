@@ -52,7 +52,7 @@ float Canbus::GetPhotodiode()
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return {-6,-6};;
+			return -6;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
