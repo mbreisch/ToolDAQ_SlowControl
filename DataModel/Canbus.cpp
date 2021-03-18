@@ -53,24 +53,30 @@ float Canbus::GetPhotodiode()
 	unsigned int num;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
+
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
 		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
-
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
-
+		
 		if(retID == 0x0D0)
 		{
 			unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
@@ -414,23 +420,29 @@ vector<float> Canbus::GetTemp()
 	unsigned int hum_hex;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return {-4,-4};
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
 
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
+		}
 
 
 		if(retID == 0x321)
@@ -497,24 +509,30 @@ int Canbus::SetHV_ONOFF(bool state){
 	unsigned int num;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
+
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
 		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
-
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
-
+		
 		if(retID == 0x041)
 		{	
 			if(retMSG == 0x0001000100010001)
@@ -656,23 +674,29 @@ int Canbus::GetHV_ONOFF(){
 	unsigned int num;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
 
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
+		}
 
 		if(retID == 0x420)
 		{	
@@ -735,23 +759,29 @@ int Canbus::SetLV(bool state){
 	unsigned int num;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
 
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
+		}
 
 		if(retID == 0x021)
 		{	
@@ -811,23 +841,29 @@ int Canbus::GetLV_ONOFF(){
 	unsigned int num;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return -4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
 
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
+		}
 
 		if(retID == 0x220)
 		{	
@@ -880,23 +916,29 @@ vector<float> Canbus::GetLV_voltage(){
 	unsigned int num;
 	while(counter<1000)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		nbytes = read(s, &frame, sizeof(struct can_frame));
+		if(nbytes<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
 			return {-4,-4,-4};
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	
+		}else if(nbytes > 0)
+		{
+			sprintf(rec_id,"%03X%c",frame.can_id,'#');
+			rec_id[5] = '\0';
+			strcpy(rec_message,rec_id);
+			num =  frame.can_dlc;
+			for (int i = 0; i < num; i++){
+				sprintf(rec_temp,"%02X",frame.data[i]);
+				strcat(rec_message,rec_temp);
+			}		
 
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
+
+			//back parse message to state
+			retID = parseResponseID(rec_message);
+			retMSG = parseResponseMSG(rec_message);	
+		}else
+		{
+			continue;
+		}
 
 		if(retID == 0x3DA)
 		{	
