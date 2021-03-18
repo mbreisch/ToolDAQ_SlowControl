@@ -925,7 +925,7 @@ vector<float> Canbus::GetLV_voltage(){
 		{
 			counter++;
 		}
-
+	}
 	return {-7,-7,-7};
 }
 
