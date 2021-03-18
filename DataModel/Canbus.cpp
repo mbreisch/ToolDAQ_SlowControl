@@ -46,13 +46,11 @@ float Canbus::GetPhotodiode()
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(256);
-
-	unsigned int num;
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return -6;
+			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
@@ -69,23 +67,22 @@ float Canbus::GetPhotodiode()
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
-		
+	
 	if(retID == 0x0D0)
 	{
 		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
 		light = lighth*5/1000;
+		
 		return light;
 	}else
 	{
-		counter++;	
-	}	
-	
-			
-	return -7;	
+		fprintf(stderr, "No response from LVHV after DAC0 check\n");
+		return -5;		
+	}		
 }
 
 //----check-----
@@ -107,49 +104,41 @@ float Canbus::GetTriggerDac0(float VREF)
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(256);
+	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
+	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return -4;
+			return 4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
+		unsigned int num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	
-
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
-
-		if(retID == 0x0CB)
-		{
-			if((retMSG>>56)==0xC0)
-			{
-				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-				float result = value*VREF/4095;
-
-				return result;
-			}
-		}else
-		{
-			fprintf(stderr, "No response from LVHV after DAC1 check\n");
-			return -6;
-		}
 	}
-	
-	return -7;
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+
+	if(retID == 0x0CB)
+	{
+		if((retMSG>>56)==0xC0)
+		{
+			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+			float result = value*VREF/4095;
+
+			return result;
+		}
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after DAC0 check\n");
+		return 5;		
+	}
 }
 
 //----check-----
@@ -173,46 +162,39 @@ float Canbus::GetTriggerDac1(float VREF)
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
+	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return -4;
+			fprintf(stderr, "DAC1: Read error!\n\n");	
+			return 4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
+		unsigned int num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	
-
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
-
-		if(retID == 0x0FE)
-		{
-			if((retMSG>>56)==0xC0)
-			{
-				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-				float result = value*VREF/4095;
-
-				return result;
-			}
-		}else
-		{
-			fprintf(stderr, "No response from LVHV after DAC1 check\n");
-			return -6;	
-		}
 	}
-	return -7;
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+
+	if(retID == 0x0FE)
+	{
+		if((retMSG>>56)==0xC0)
+		{
+			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+			float result = value*VREF/4095;
+
+			return result;
+		}
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after DAC1 check\n");
+		return 5;		
+	}
 }
 
 //----check-----
@@ -252,53 +234,48 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(64);
 	nbytes=0;
-	int counter = 0;
-	unsigned int retID;
-	unsigned long long retMSG;
-	unsigned int num;
-	while(counter<1000)
-	{
+	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
 			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return -4;
+			return 4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
-		num =  frame.can_dlc;
+		unsigned int num =  frame.can_dlc;
 		for (int i = 0; i < num; i++){
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}		
-	
-
-		//back parse message to state
-		retID = parseResponseID(rec_message);
-		retMSG = parseResponseMSG(rec_message);	
-
-		//Analize response
-		if(retID == 0x0BA)
-		{
-			if((retMSG>>56)==0xC0)
-			{
-				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-				float result = value*VREF/4095;
-				if(result == threshold)
-				{
-					return 0;
-				}else
-				{
-					std::cout << "Result was " << result << std::endl;
-					return -6;
-				}
-			}
-		}else
-		{
-			counter++;		
-		}
 	}
 
-	return -7;
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+
+	//Analize response
+	if(retID == 0x0BA)
+	{
+		if((retMSG>>56)==0xC0)
+		{
+			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+			float result = value*VREF/4095;
+			if(result == threshold)
+			{
+				return 0;
+			}else
+			{
+				std::cout << "Result was " << result << std::endl;
+				return 6;
+			}
+		}
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after DAC0 check\n");
+		return 5;		
+	}
+
+	return retval;
 }
 
 //----check-----
@@ -408,18 +385,11 @@ vector<float> Canbus::GetTemp()
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(256);
-
-	unsigned int num;
-	unsigned long long t_temp;
-	unsigned int temp_hex;
-	unsigned long long t_hum;
-	unsigned int hum_hex;
-	
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return {-6,-6};;
+			fprintf(stderr, "HV: Read error!\n\n");	
+			return {-4,-4};
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
@@ -433,14 +403,18 @@ vector<float> Canbus::GetTemp()
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
-
+	
+	unsigned long long t_temp;
+	unsigned int temp_hex;
+	unsigned long long t_hum;
+	unsigned int hum_hex;
 
 	if(retID == 0x321)
 	{
@@ -456,15 +430,13 @@ vector<float> Canbus::GetTemp()
 		RHT[1] = (H);
 
 		cout << "H=" << H << " T=" << T << endl; 
-
-		return RHT;
 	}else
 	{
-		fprintf(stderr, "Response doesn't make sense!\n");
-		return {-6,-6};
+		fprintf(stderr, "No response from LVHV after RHT check\n");
+		return {-5,-5};
 	}
 
-	return {-7,-7};
+	return RHT;
 }
 
 //sends a can message to turn on/off the HV
@@ -504,7 +476,7 @@ int Canbus::SetHV_ONOFF(bool state){
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
+			fprintf(stderr, "HV: Read error!\n\n");	
 			return -4;
 		}
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
@@ -519,14 +491,14 @@ int Canbus::SetHV_ONOFF(bool state){
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
-		
+
 	if(retID == 0x041)
 	{	
 		if(retMSG == 0x0001000100010001)
@@ -549,11 +521,11 @@ int Canbus::SetHV_ONOFF(bool state){
 		}
 	}else
 	{
-		fprintf(stderr, "Response doesn't make sense!\n");
+		fprintf(stderr, "No response from LVHV after HV check\n");
 		return -6;
 	}
 
-	return -7;
+	return retval;
 }
 
 //sends a can message to set the HV voltage
@@ -666,9 +638,10 @@ int Canbus::GetHV_ONOFF(){
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
+			fprintf(stderr, "HV: Read error!\n\n");	
 			return -4;
 		}
+
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
@@ -678,17 +651,17 @@ int Canbus::GetHV_ONOFF(){
 			strcat(rec_message,rec_temp);
 		}		
 	}
-
+	
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
-	       
+
 	if(retID == 0x420)
 	{	
 		if(retMSG == 0x0000000000000000)
@@ -704,11 +677,11 @@ int Canbus::GetHV_ONOFF(){
 		}
 	}else
 	{
-		fprintf(stderr, "Response doesn't make sense!\n");
+		fprintf(stderr, "No response from LVHV after HV check\n");
 		return -6;
 	}
-	
-	return -7;
+
+	return HV_state;
 }
 
 //sends a can message to turn on/off the LV
@@ -748,9 +721,10 @@ int Canbus::SetLV(bool state){
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
+			fprintf(stderr, "LV: Read error!\n\n");	
 			return -4;
 		}
+
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
@@ -763,14 +737,14 @@ int Canbus::SetLV(bool state){
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
-	       
+
 	if(retID == 0x021)
 	{	
 		if(retMSG == 0x0001000100010001)
@@ -793,11 +767,11 @@ int Canbus::SetLV(bool state){
 		}
 	}else
 	{
-		fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
-		return -6;	
+		fprintf(stderr, "No response from LVHV after LV check\n");
+		return -6;
 	}
 
-	return -7;
+	return retval;
 }
 
 //sends a can message to get the LV state
@@ -827,9 +801,10 @@ int Canbus::GetLV_ONOFF(){
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
+			fprintf(stderr, "LV: Read error!\n\n");	
 			return -4;
 		}
+
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
@@ -839,17 +814,17 @@ int Canbus::GetLV_ONOFF(){
 			strcat(rec_message,rec_temp);
 		}		
 	}
-
+	
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
-	       
+
 	if(retID == 0x220)
 	{	
 		if(retMSG == 0x0000000000000000)
@@ -865,11 +840,11 @@ int Canbus::GetLV_ONOFF(){
 		}
 	}else
 	{
-		fprintf(stderr, "Response ID doesn't make sense! (LV get 220#)\n");
+		fprintf(stderr, "No response from LVHV after LV check\n");
 		return -6;
 	}
 
-	return -7;
+	return LV_state;
 }
 
 //sends a can message to get the LV voltages
@@ -899,9 +874,10 @@ vector<float> Canbus::GetLV_voltage(){
 	nbytes=0;
 	while(nbytes<=0){
 		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
+			fprintf(stderr, "LV: Read error!\n\n");	
 			return {-4,-4,-4};
 		}
+
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[5] = '\0';
 		strcpy(rec_message,rec_id);
@@ -911,13 +887,13 @@ vector<float> Canbus::GetLV_voltage(){
 			strcat(rec_message,rec_temp);
 		}		
 	}
-
+	
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 	
 	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n, rec_message);
+	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
@@ -927,7 +903,7 @@ vector<float> Canbus::GetLV_voltage(){
 		unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
 		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
 		unsigned int v12h = (retMSG & 0x000000000000FFFF);
-
+		
 		v33 = v33h*5/1000;;
 		if(v33>=0)
 		{
@@ -943,14 +919,13 @@ vector<float> Canbus::GetLV_voltage(){
 		{
 			volts[2] = (v12);
 		}
-		return volts;
 	}else
 	{
-		fprintf(stderr, "Response ID doesn't make sense!\n");
-		return {-6,-6,-6};
+		fprintf(stderr, "No response from LVHV after LV check\n");
+		return {-5,-5,-5};
 	}
 
-	return {-7,-7,-7};
+	return volts;
 }
 
 
