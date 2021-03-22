@@ -2,7 +2,7 @@
 
 Canbus::Canbus(){};
 
-bool Canbus::Connect_Receive(){ 
+bool Canbus::Connect(){ 
 	if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
 	{
 	    perror("socket");
@@ -26,39 +26,6 @@ bool Canbus::Connect_Receive(){
 	return true;
 }
 
-bool Canbus::Connect_Send(){ 
-	//mtu??
-	
-	if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
-	{
-		perror("socket");
-		return false;
-	}
-
-	strcpy(ifr.ifr_name, "can0");
-	ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
- 	if (!ifr.ifr_ifindex)
-  	{
-    		perror("if_nametoindex");
-    		return false;
-  	}
-	
-	memset(&addr, 0, sizeof(addr));
-	
-	addr.can_family = AF_CAN;
-	addr.can_ifindex = ifr.ifr_ifindex;
-	
-	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
-	
-	if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-	{
-		perror("bind");
-		return false;
-	}
-	
-	return true;
-}
-
 bool Canbus::Disconnect(){ 
 	close(s);
 	return true;
@@ -66,32 +33,82 @@ bool Canbus::Disconnect(){
 
 
 int Canbus::SendMessage(unsigned int id, unsigned long long msg){
+	int mtu;
+	int enable_canfd = 1;
 	
-	if(!Connect_Send())
+	required_mtu = createCanFrame(id,msg,&frame);
+	if(!required_mtu)
 	{
-		fprintf(stderr, "Could not connection on send!\n\n");	
-		return "";	
+		fprintf(stderr, "\nWrong CAN frame format!\n\n");
+		return -11;
+	}
+
+	if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
+	{
+		perror("socket");
+		return -12;
 	}
 	
-	//Ask for sensor data
-	if(createCanFrame(id,msg,&frame)!=0){
-		fprintf(stderr, "Write: Wrong format!\n\n");
-		return -1;
+	strcpy(ifr.ifr_name, "can0");
+	ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
+	if (!ifr.ifr_ifindex)
+	{
+		perror("if_nametoindex");
+		return -12;
 	}
-	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
+	
+	memset(&addr, 0, sizeof(addr));
+	
+	addr.can_family = AF_CAN;
+	addr.can_ifindex = ifr.ifr_ifindex;
+	
+	if (required_mtu > (int)CAN_MTU)
+	{
+		/* check if frame fits into the CAN netdevice */
+		if (ioctl(s, SIOCGIFMTU, &ifr) < 0)
+		{
+			perror ("SIOCGIFMTU");
+			return -11;
+		}
+		mtu = ifr.ifr_mtu;
+
+		if (mtu != CANFD_MTU)
+		{
+			printf("CAN interface is not CAN FD capable - sorry.\n");
+			return -11;
+		}
+
+		/* interface is ok - try to switch the socket into CAN FD mode */
+		if (setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd)))
+		{
+			printf("error when enabling CAN FD support\n");
+			return -11;
+		}
+
+		frame.len = can_dlc2len(can_len2dlc(frame.len));
+	}
+	
+	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
+	
+	if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	{
+		perror("bind");
+		return 1;
+	}
+	
+	if ((nbytes = write(s, &frame, required_mtu)) != required_mtu) {
 		fprintf(stderr, "Write error!\n\n");
 		return -2;
 	}
 	
 	Disconnect();
 	
-	return 0;
-	
+	return 0;	
 }
 
 char* Canbus::ReceiveMessage(){
 	
-	if(!Connect_Receive())
+	if(!Connect())
 	{
 		fprintf(stderr, "Could not connection on read!\n\n");	
 		return "";	
