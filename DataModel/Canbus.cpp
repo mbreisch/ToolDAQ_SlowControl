@@ -2,7 +2,25 @@
 
 Canbus::Canbus(){};
 
-bool Canbus::Connect(){ 
+bool Canbus::Connect_Receive(){ 
+	s = socket(PF_CAN,SOCK_RAW,CAN_RAW);
+	memset(&addr, 0, sizeof(addr));
+	
+	int canfd_enabled = 1;
+	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_enabled, sizeof(int));
+	
+	strcpy(ifr.ifr_name, "can0");
+	ioctl(s, SIOCGIFINDEX, &ifr);
+	
+	addr.can_family = AF_CAN;
+	addr.can_ifindex = ifr.ifr_ifindex;
+	
+	bind(s,(struct sockaddr *)&addr, sizeof(addr));
+	
+	return true;
+}
+
+bool Canbus::Connect_Send(){ 
 	s = socket(PF_CAN,SOCK_RAW,CAN_RAW);
 	memset(&addr, 0, sizeof(addr));
 	
@@ -40,6 +58,8 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 		return -2;
 	}
 	
+	Disconnect();
+	
 	return 0;
 	
 }
@@ -67,6 +87,8 @@ char* Canbus::ReceiveMessage(){
 		sprintf(rec_temp,"%02X",frame.data[i]);
 		strcat(rec_message,rec_temp);
 	}
+	
+	Disconnect();
 	
 	return rec_message;
 }
