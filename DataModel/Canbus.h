@@ -24,6 +24,7 @@
 #include <wiringPi.h>
 
 #define CANID_DELIM '#'
+#define CAN_DLC 8
 #define DELIM "#"
 #define DATA_SEPERATOR '.'
 #define C40N_MAX 4000.0 // V
@@ -78,6 +79,7 @@ public:
 
 	int s;
 	int nbytes;
+	int required_mtu;
 	struct ifreq ifr;
 	struct sockaddr_can addr;
 	struct can_frame frame;
@@ -126,6 +128,8 @@ public:
 		t_frame = parseFrame(id,msg);
 
 		int i, idx, dlc, len;
+		int maxdlen = CAN_MAX_DLEN;
+  		int ret = CAN_MTU;
 		unsigned char temp;
 
 		len = strlen(t_frame);
@@ -133,7 +137,7 @@ public:
 
 		if (len<4)
 		{
-			return 1;
+			return 0;
 		}
 		if (t_frame[3] == CANID_DELIM)
 		{
@@ -142,7 +146,7 @@ public:
 			{
 		  		if((temp = asc2nib(t_frame[i])) > 0x0F)
 		  		{
-		    		return 1;
+		    		return 0;
 		  		}
 		  		cf->can_id |= (temp << (2-i)*4);
 			}
@@ -153,7 +157,7 @@ public:
 			{
 		  		if((temp = asc2nib(t_frame[i])) > 0x0F)
 		  		{
-				    return 1;
+				    return 0;
 				}
 		  		cf->can_id |= (temp << (7-i)*4);
 			}
@@ -163,9 +167,33 @@ public:
 			}
 		} else 
 		{
-			return 1;
+			return 0;
 		}
 
+		if ((t_frame[idx] == 'R') || (t_frame[idx] == 'r')) // RTR frame
+		{
+			cf->can_id |= CAN_RTR_FLAG;
+
+			/* check for optional DLC value for CAN 2.0B frames */
+			if (t_frame[++idx] && (tmp = asc2nibble(t_frame[idx])) <= CAN_MAX_DLC)
+			cf->len = tmp;
+
+			return ret;
+		}
+		
+		if (t_frame[idx] == CANID_DELIM) // CAN FD frame escape char '##'
+		{
+			maxdlen = CANFD_MAX_DLEN;
+			ret = CANFD_MTU;
+
+			/* CAN FD frame <canid>##<flags><data> */
+			if ((tmp = asc2nibble(cs[idx+1])) > 0x0F)
+			return 0;
+
+			cf->flags = tmp;
+			idx += 2;
+		}
+		
 		for (i=0, dlc=0; i<16; i++)
 		{
 			if(t_frame[idx] == DATA_SEPERATOR)
@@ -178,19 +206,19 @@ public:
 			}
 			if((temp = asc2nib(t_frame[idx++])) > 0x0F)
 			{
-		  		return 1;
+		  		return 0;
 			}
 			cf->data[i] = (temp << 4);
 			if((temp = asc2nib(t_frame[idx++])) > 0x0F)
 			{
-		  		return 1;
+		  		return 0;
 			}
 			cf->data[i] |= temp;
 			dlc++;
 		}
 		cf->can_dlc = dlc;
 
-		return 0;
+		return ret;
 	}
 
 	unsigned int parseResponseID(char* response)
@@ -214,7 +242,7 @@ public:
 	  unsigned long long retMSG;
 
 	  char ch_msg[17];
-	  for(int i=0; i<16; i++)
+	  for(int i=0; i<maxdlen; i++)
 	  {
 	    ch_msg[i] = response[i+4];
 	  }
