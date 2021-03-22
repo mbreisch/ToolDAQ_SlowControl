@@ -82,7 +82,7 @@ public:
 	int required_mtu;
 	struct ifreq ifr;
 	struct sockaddr_can addr;
-	struct can_frame frame;
+	struct canfd_frame frame;
 
 	unsigned char asc2nib(char c){
 		if((c>='0') && (c<='9'))
@@ -122,7 +122,7 @@ public:
 	}
 
 
-	int createCanFrame(unsigned int id, unsigned long long msg, struct can_frame *cf)
+	int createCanFrame(unsigned int id, unsigned long long msg, struct canfd_frame *cf)
 	{
 		char *t_frame = (char *)malloc(128);
 		t_frame = parseFrame(id,msg);
@@ -175,8 +175,8 @@ public:
 			cf->can_id |= CAN_RTR_FLAG;
 
 			/* check for optional DLC value for CAN 2.0B frames */
-			if (t_frame[++idx] && (tmp = asc2nibble(t_frame[idx])) <= CAN_MAX_DLC)
-			cf->len = tmp;
+			if (t_frame[++idx] && (temp = asc2nib(t_frame[idx])) <= CAN_MAX_DLC)
+			cf->len = temp;
 
 			return ret;
 		}
@@ -187,14 +187,14 @@ public:
 			ret = CANFD_MTU;
 
 			/* CAN FD frame <canid>##<flags><data> */
-			if ((tmp = asc2nibble(cs[idx+1])) > 0x0F)
+			if ((temp = asc2nib(t_frame[idx+1])) > 0x0F)
 			return 0;
 
-			cf->flags = tmp;
+			cf->flags = temp;
 			idx += 2;
 		}
 		
-		for (i=0, dlc=0; i<16; i++)
+		for (i=0, dlc=0; i<maxdlen; i++)
 		{
 			if(t_frame[idx] == DATA_SEPERATOR)
 			{
@@ -216,7 +216,7 @@ public:
 			cf->data[i] |= temp;
 			dlc++;
 		}
-		cf->can_dlc = dlc;
+		cf->len = dlc;
 
 		return ret;
 	}
@@ -242,7 +242,7 @@ public:
 	  unsigned long long retMSG;
 
 	  char ch_msg[17];
-	  for(int i=0; i<maxdlen; i++)
+	  for(int i=0; i<16; i++)
 	  {
 	    ch_msg[i] = response[i+4];
 	  }
