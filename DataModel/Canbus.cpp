@@ -126,6 +126,10 @@ char* Canbus::ReceiveMessage(unsigned int id){
 			fprintf(stderr, "Read error!\n\n");	
 			return rec_message;
 		}
+		if(nbytes==0)
+		{
+			continue;
+		}
 	
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[4] = '\0';
