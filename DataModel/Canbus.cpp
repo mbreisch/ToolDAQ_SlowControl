@@ -71,7 +71,7 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 		return 1;
 	}
 	
-	if ((nbytes = write(s, &frame, required_mtu)) != required_mtu) {
+	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
 		fprintf(stderr, "Write error!\n\n");
 		return -2;
 	}
