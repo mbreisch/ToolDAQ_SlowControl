@@ -3,19 +3,25 @@
 Canbus::Canbus(){};
 
 bool Canbus::Connect_Receive(){ 
-	s = socket(PF_CAN,SOCK_RAW,CAN_RAW);
-	memset(&addr, 0, sizeof(addr));
-	
-	int canfd_enabled = 1;
-	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_enabled, sizeof(int));
+	if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
+	{
+	    perror("socket");
+	    return false;
+	}
 	
 	strcpy(ifr.ifr_name, "can0");
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	
+	memset(&addr, 0, sizeof(addr));
+	
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
-	
-	bind(s,(struct sockaddr *)&addr, sizeof(addr));
+
+  	if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	{
+		perror("bind");
+		return false;
+	}
 	
 	return true;
 }
@@ -46,7 +52,11 @@ bool Canbus::Disconnect(){
 
 int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 	
-	Connect();
+	if(!Connect_Send())
+	{
+		fprintf(stderr, "Could not connection on send!\n\n");	
+		return "";	
+	}
 	
 	//Ask for sensor data
 	if(createCanFrame(id,msg,&frame)!=0){
@@ -66,7 +76,11 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 
 char* Canbus::ReceiveMessage(){
 	
-	Connect();
+	if(!Connect_Receive())
+	{
+		fprintf(stderr, "Could not connection on read!\n\n");	
+		return "";	
+	}
 	
 	//Recieve sensor data 
 	char rec_id[5];
@@ -74,10 +88,12 @@ char* Canbus::ReceiveMessage(){
 	char *rec_message; rec_message = (char*) malloc(256);
 	
 	nbytes=0;
-	
-	if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-		fprintf(stderr, "Read error!\n\n");	
-		return rec_message;
+	while(nbytes==0)
+	{
+		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+			fprintf(stderr, "Read error!\n\n");	
+			return rec_message;
+		}
 	}
 	sprintf(rec_id,"%03X%c",frame.can_id,'#');
 	rec_id[4] = '\0';
