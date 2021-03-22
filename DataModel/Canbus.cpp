@@ -106,7 +106,7 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 	return 0;	
 }
 
-char* Canbus::ReceiveMessage(){
+char* Canbus::ReceiveMessage(unsigned int id){
 	
 	if(!Connect())
 	{
@@ -126,14 +126,25 @@ char* Canbus::ReceiveMessage(){
 			fprintf(stderr, "Read error!\n\n");	
 			return rec_message;
 		}
-	}
-	sprintf(rec_id,"%03X%c",frame.can_id,'#');
-	rec_id[4] = '\0';
-	strcpy(rec_message,rec_id);
-	unsigned int num =  frame.len;
-	for (int i = 0; i < num; i++){
-		sprintf(rec_temp,"%02X",frame.data[i]);
-		strcat(rec_message,rec_temp);
+	
+		sprintf(rec_id,"%03X%c",frame.can_id,'#');
+		rec_id[4] = '\0';
+		strcpy(rec_message,rec_id);
+		unsigned int num =  frame.len;
+		for (int i = 0; i < num; i++){
+			sprintf(rec_temp,"%02X",frame.data[i]);
+			strcat(rec_message,rec_temp);
+		}
+		
+		if(id == parseResponseID(rec_message))
+		{
+			memset(rec_id, 0, sizeof rec_id);
+			memset(rec_temp, 0, sizeof rec_temp);
+			memset(rec_message, 0, sizeof rec_message);
+			continue;
+		}else{
+			break;
+		}
 	}
 	
 	Disconnect();
@@ -161,7 +172,7 @@ float Canbus::GetPhotodiode()
 	char* rec_message;
 	while(c<100)
 	{	
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
@@ -373,13 +384,12 @@ vector<float> Canbus::GetTemp()
 	{
 		return {(float)retval,(float)retval};	
 	}
-	
-	usleep(1000);
+
 	int c=0;
 	char* rec_message;
 	while(c<100)
 	{
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
@@ -456,7 +466,7 @@ int Canbus::SetHV_ONOFF(bool state){
 	char* rec_message;
 	while(c<100)
 	{
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
@@ -600,7 +610,7 @@ int Canbus::GetHV_ONOFF(){
 	char* rec_message;
 	while(c<100)
 	{
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
@@ -671,7 +681,7 @@ int Canbus::SetLV(bool state){
 	char* rec_message;
 	while(c<100)
 	{
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
@@ -738,7 +748,7 @@ int Canbus::GetLV_ONOFF(){
 	char* rec_message;
 	while(c<100)
 	{
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
@@ -798,7 +808,7 @@ vector<float> Canbus::GetLV_voltage(){
 	char* rec_message;
 	while(c<100)
 	{
-		rec_message = ReceiveMessage();
+		rec_message = ReceiveMessage(id);
 		if(strlen(rec_message)<=0)
 		{
 			c++;
