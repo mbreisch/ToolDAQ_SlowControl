@@ -122,7 +122,7 @@ char* Canbus::ReceiveMessage(){
 	nbytes=0;
 	while(nbytes==0)
 	{
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
+		if((nbytes = read(s, &frame, sizeof(struct canfd_frame)))<0){
 			fprintf(stderr, "Read error!\n\n");	
 			return rec_message;
 		}
