@@ -33,11 +33,12 @@ bool Canbus::Disconnect(){
 
 
 int Canbus::SendMessage(unsigned int id, unsigned long long msg){
-	int mtu;
+
 	int enable_canfd = 1;
+	int retval; 
 	
-	required_mtu = createCanFrame(id,msg,&frame);
-	if(!required_mtu)
+	retval = createCanFrame(id,msg,&frame);
+	if(!retval)
 	{
 		fprintf(stderr, "\nWrong CAN frame format!\n\n");
 		return -11;
@@ -61,32 +62,6 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 	
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
-	
-	if (required_mtu > (int)CAN_MTU)
-	{
-		/* check if frame fits into the CAN netdevice */
-		if (ioctl(s, SIOCGIFMTU, &ifr) < 0)
-		{
-			perror ("SIOCGIFMTU");
-			return -11;
-		}
-		mtu = ifr.ifr_mtu;
-
-		if (mtu != CANFD_MTU)
-		{
-			printf("CAN interface is not CAN FD capable - sorry.\n");
-			return -11;
-		}
-
-		/* interface is ok - try to switch the socket into CAN FD mode */
-		if (setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd)))
-		{
-			printf("error when enabling CAN FD support\n");
-			return -11;
-		}
-
-		frame.len = can_dlc2len(can_len2dlc(frame.len));
-	}
 	
 	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
 	
@@ -130,7 +105,7 @@ char* Canbus::ReceiveMessage(){
 	sprintf(rec_id,"%03X%c",frame.can_id,'#');
 	rec_id[4] = '\0';
 	strcpy(rec_message,rec_id);
-	unsigned int num =  frame.can_dlc;
+	unsigned int num =  frame.len;
 	for (int i = 0; i < num; i++){
 		sprintf(rec_temp,"%02X",frame.data[i]);
 		strcat(rec_message,rec_temp);
@@ -196,39 +171,11 @@ float Canbus::GetPhotodiode()
 
 //----check-----
 float Canbus::GetTriggerDac0(float VREF)
-{
+{/*
 	unsigned int id = 0x0BC;
 	unsigned long long msg = 0x0000000000000000;
 
-	//Ask for sensor data
-	if(createCanFrame(id,msg,&frame)!=0){
-		fprintf(stderr, "DAC0: Wrong format!\n\n");
-		return 2;
-	}
-	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
-		fprintf(stderr, "DAC0: Write error!\n\n");
-		return 3;
-	}
-
-	//Recieve sensor data 
-	char rec_id[5];
-	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return 4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	}
+	//send & read
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
@@ -248,43 +195,15 @@ float Canbus::GetTriggerDac0(float VREF)
 		fprintf(stderr, "No response from LVHV after DAC0 check\n");
 		return 5;		
 	}
-}
+*/}
 
 //----check-----
 float Canbus::GetTriggerDac1(float VREF)
-{
+{/*
 	unsigned int id = 0x0EF;
 	unsigned long long msg = 0x0000000000000000;
 
-	//Ask for sensor data
-	if(createCanFrame(id,msg,&frame)!=0){
-		fprintf(stderr, "DAC1: Wrong format!\n\n");
-		return 2;
-	}
-	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
-		fprintf(stderr, "DAC1: Write error!\n\n");
-		return 3;
-	}
-
-	//Recieve sensor data 
-	char rec_id[5];
-	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC1: Read error!\n\n");	
-			return 4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	}
+	//send & read
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
@@ -304,11 +223,11 @@ float Canbus::GetTriggerDac1(float VREF)
 		fprintf(stderr, "No response from LVHV after DAC1 check\n");
 		return 5;		
 	}
-}
+*/}
 
 //----check-----
 int Canbus::SetTriggerDac0(float threshold, float VREF)
-{
+{/*
 	unsigned int id = 0x0AB;
 	unsigned long long msg = 0x0000000000000000;
 	int retval;
@@ -328,35 +247,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 
 	msg = msg | (tmp<<48);
 
-	//Ask for sensor data
-	if(createCanFrame(id,msg,&frame)!=0){
-		fprintf(stderr, "DAC0: Wrong format!\n\n");
-		return 2;
-	}
-	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
-		fprintf(stderr, "DAC0: Write error!\n\n");
-		return 3;
-	}
-
-	//Recieve sensor data 
-	char rec_id[5];
-	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC0: Read error!\n\n");	
-			return 4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	}
+	//send & read
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
@@ -385,11 +276,11 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	}
 
 	return retval;
-}
+*/}
 
 //----check-----
 int Canbus::SetTriggerDac1(float threshold, float VREF)
-{
+{/*
 	unsigned int id = 0x0DE;
 	unsigned long long msg = 0x0000000000000000;
 	int retval;
@@ -409,35 +300,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 
 	msg = msg | (tmp<<48);
 
-	//Ask for sensor data
-	if(createCanFrame(id,msg,&frame)!=0){
-		fprintf(stderr, "DAC1: Wrong format!\n\n");
-		return 2;
-	}
-	if ((nbytes = write(s, &frame, sizeof(frame))) != sizeof(frame)) {
-		fprintf(stderr, "DAC1: Write error!\n\n");
-		return 3;
-	}
-
-	//Recieve sensor data 
-	char rec_id[5];
-	char rec_temp[3];
-	char *rec_message; rec_message = (char*) malloc(64);
-	nbytes=0;
-	while(nbytes<=0){
-		if((nbytes = read(s, &frame, sizeof(struct can_frame)))<0){
-			fprintf(stderr, "DAC1: Read error!\n\n");	
-			return 4;
-		}
-		sprintf(rec_id,"%03X%c",frame.can_id,'#');
-		rec_id[5] = '\0';
-		strcpy(rec_message,rec_id);
-		unsigned int num =  frame.can_dlc;
-		for (int i = 0; i < num; i++){
-			sprintf(rec_temp,"%02X",frame.data[i]);
-			strcat(rec_message,rec_temp);
-		}		
-	}
+	//send & read
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
@@ -466,7 +329,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	}
 
 	return retval;
-}
+*/}
 
 
 //Gets the readout from the temperature &
