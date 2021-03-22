@@ -373,7 +373,8 @@ vector<float> Canbus::GetTemp()
 	{
 		return {(float)retval,(float)retval};	
 	}
-
+	
+	usleep(1000);
 	int c=0;
 	char* rec_message;
 	while(c<100)
