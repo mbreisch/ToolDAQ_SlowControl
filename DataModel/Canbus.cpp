@@ -27,19 +27,34 @@ bool Canbus::Connect_Receive(){
 }
 
 bool Canbus::Connect_Send(){ 
-	s = socket(PF_CAN,SOCK_RAW,CAN_RAW);
-	memset(&addr, 0, sizeof(addr));
+	//mtu??
 	
-	int canfd_enabled = 1;
-	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_enabled, sizeof(int));
-	
+	if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
+	{
+		perror("socket");
+		return false;
+	}
+
 	strcpy(ifr.ifr_name, "can0");
-	ioctl(s, SIOCGIFINDEX, &ifr);
+	ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
+ 	if (!ifr.ifr_ifindex)
+  	{
+    		perror("if_nametoindex");
+    		return false;
+  	}
+	
+	memset(&addr, 0, sizeof(addr));
 	
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
 	
-	bind(s,(struct sockaddr *)&addr, sizeof(addr));
+	setsockopt(s, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
+	
+	if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	{
+		perror("bind");
+		return false;
+	}
 	
 	return true;
 }
