@@ -47,7 +47,7 @@ public:
 	bool Connect(); //done 
 	bool Disconnect(); //done
 	int SendMessage(unsigned int id, unsigned long long msg);
-	char* ReceiveMessage();
+	char* ReceiveMessage(unsigned int id);
 
 	//LV
 	int SetLV(bool state); //done
