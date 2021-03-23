@@ -124,12 +124,12 @@ char* Canbus::ReceiveMessage(unsigned int id, unsigned long long msg){
 	nbytes=0;
 	while(nbytes==0)
 	{
-		usleep(10);
+		usleep(TIMEOUT_ITER);
 		if(counter==100)
 		{
 			counter=0;
 			SendMessage(id,msg);
-			usleep(1000);
+			usleep(TIMEOUT_RS);
 		}
 		
 		if((nbytes = read(s, &frame, sizeof(struct canfd_frame)))<0){
@@ -184,7 +184,7 @@ float Canbus::GetPhotodiode()
 		return retval;	
 	}
 
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 	
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
@@ -398,7 +398,7 @@ vector<float> Canbus::GetTemp()
 		return {(float)retval,(float)retval};	
 	}
 
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 	
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
@@ -472,7 +472,7 @@ int Canbus::SetHV_ONOFF(bool state){
 		return retval;	
 	}
 	
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
@@ -613,7 +613,7 @@ int Canbus::GetHV_ONOFF(){
 		return retval;	
 	}
 
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 	
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
@@ -681,7 +681,7 @@ int Canbus::SetLV(bool state){
 		return retval;	
 	}
 
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 	
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
@@ -745,7 +745,7 @@ int Canbus::GetLV_ONOFF(){
 		return retval;	
 	}
 
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
@@ -802,7 +802,7 @@ vector<float> Canbus::GetLV_voltage(){
 		return {(float)retval,(float)retval,(float)retval};	
 	}
 
-	usleep(10000);
+	usleep(TIMEOUT_RS);
 	
 	char* rec_message;
 	rec_message = ReceiveMessage(id,msg);
