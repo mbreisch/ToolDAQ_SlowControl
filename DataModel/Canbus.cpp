@@ -128,11 +128,7 @@ char* Canbus::ReceiveMessage(unsigned int id, unsigned long long msg){
 		if(counter==100)
 		{
 			counter=0;
-			int retval = SendMessage(id,msg);
-			if(retval!=0)
-			{
-				return retval;	
-			}
+			SendMessage(id,msg);
 			usleep(1000);
 		}
 		
