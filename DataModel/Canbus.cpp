@@ -600,7 +600,7 @@ int Canbus::SetHV_voltage(float volts){
 //1: true = on
 //-n: fail
 int Canbus::GetHV_ONOFF(){ 
-	unsigned int id = 0x042;
+	unsigned int id = 0x034;
 	unsigned long long msg = 0x0000BEEFDEAD0000;
 	int HV_state=-1;
 	
@@ -632,7 +632,7 @@ int Canbus::GetHV_ONOFF(){
 		printf("MSG: 0x%0llx\n", retMSG);
 		std::cout << "----------------------------------------------" << std::endl;
 
-		if(retID == 0x420)
+		if(retID == 0x035)
 		{	
 			if(retMSG == 0x0000000000000000)
 			{
