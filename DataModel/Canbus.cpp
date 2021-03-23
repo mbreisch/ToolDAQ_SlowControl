@@ -3,6 +3,7 @@
 Canbus::Canbus(){};
 
 bool Canbus::Connect(){ 
+	//Create a socket
 	if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
 	{
 	    perror("socket");
@@ -106,7 +107,7 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 	return 0;	
 }
 
-char* Canbus::ReceiveMessage(unsigned int id){
+char* Canbus::ReceiveMessage(unsigned int id, unsigned long long msg){
 	
 	if(!Connect())
 	{
@@ -114,6 +115,7 @@ char* Canbus::ReceiveMessage(unsigned int id){
 		return "";	
 	}
 	
+	int counter=0;
 	//Recieve sensor data 
 	char rec_id[5];
 	char rec_temp[3];
@@ -122,12 +124,25 @@ char* Canbus::ReceiveMessage(unsigned int id){
 	nbytes=0;
 	while(nbytes==0)
 	{
+		usleep(10);
+		if(counter==100)
+		{
+			counter=0;
+			int retval = SendMessage(id,msg);
+			if(retval!=0)
+			{
+				return retval;	
+			}
+			usleep(1000);
+		}
+		
 		if((nbytes = read(s, &frame, sizeof(struct canfd_frame)))<0){
 			fprintf(stderr, "Read error!\n\n");	
 			return rec_message;
 		}
 		if(nbytes==0)
 		{
+			counter++;
 			continue;
 		}
 	
@@ -145,10 +160,11 @@ char* Canbus::ReceiveMessage(unsigned int id){
 			memset(rec_id, 0, sizeof rec_id);
 			memset(rec_temp, 0, sizeof rec_temp);
 			memset(rec_message, 0, sizeof rec_message);
+			counter++;
 			continue;
 		}else{
 			break;
-		}
+		}	
 	}
 	
 	Disconnect();
@@ -172,40 +188,36 @@ float Canbus::GetPhotodiode()
 		return retval;	
 	}
 
-	int c=0;
 	char* rec_message;
-	while(c<100)
-	{	
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}
 
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);	
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
-		
-		if(retID == 0x0D0)
-		{
-			unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
-			light = lighth*5/1000;
-			
-			return light;
-		}else
-		{
-			fprintf(stderr, "No response from LVHV after Light check\n");
-			return -5;		
-		}	
-		c++;
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x0D0)
+	{
+		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
+		light = lighth*5/1000;
+
+		return light;
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after Light check\n");
+		return -5;		
 	}	
+
 	return -7;
 }
 
@@ -389,54 +401,50 @@ vector<float> Canbus::GetTemp()
 		return {(float)retval,(float)retval};	
 	}
 
-	int c=0;
 	char* rec_message;
-	while(c<100)
+
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
 	{
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}
-	
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
-		
-		unsigned long long t_temp;
-		unsigned int temp_hex;
-		unsigned long long t_hum;
-		unsigned int hum_hex;
-
-		if(retID == 0x321)
-		{
-			t_temp = retMSG & 0x000000FFFC000000;
-			temp_hex = t_temp >> 26;
-			t_hum = retMSG &  0x003FFF0000000000;
-			hum_hex = t_hum >> 40;
-
-			float T = (temp_hex/(pow(2,14)-2))*165-40;
-			float H = (hum_hex/(pow(2,14)-2))*100;
-
-			RHT[0] = (T);
-			RHT[1] = (H);
-
-			cout << "H=" << H << " T=" << T << endl; 
-			return RHT;
-		}else
-		{
-			fprintf(stderr, "No response from LVHV after RHT check\n");
-			return {-6,-6};	
-		}
-		c++;
+		rec_message = ReceiveMessage(id,msg);
 	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
+
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	unsigned long long t_temp;
+	unsigned int temp_hex;
+	unsigned long long t_hum;
+	unsigned int hum_hex;
+
+	if(retID == 0x321)
+	{
+		t_temp = retMSG & 0x000000FFFC000000;
+		temp_hex = t_temp >> 26;
+		t_hum = retMSG &  0x003FFF0000000000;
+		hum_hex = t_hum >> 40;
+
+		float T = (temp_hex/(pow(2,14)-2))*165-40;
+		float H = (hum_hex/(pow(2,14)-2))*100;
+
+		RHT[0] = (T);
+		RHT[1] = (H);
+
+		cout << "H=" << H << " T=" << T << endl; 
+		return RHT;
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after RHT check\n");
+		return {-6,-6};	
+	}
+
 	return {-7,-7};
 }
 
@@ -466,54 +474,50 @@ int Canbus::SetHV_ONOFF(bool state){
 		return retval;	
 	}
 
-	int c=0;
 	char* rec_message;
-	while(c<100)
+
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
 	{
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}
+		rec_message = ReceiveMessage(id,msg);
+	}
 
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-		if(retID == 0x041)
-		{	
-			if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense!\n");
-				return -5;	
-			}
-		}else if(retID == 0x031)
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x041)
+	{	
+		if(retMSG == 0x0001000100010001)
 		{
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense!\n");
-				return -5;	
-			}
+			return 1;
 		}else
 		{
-			fprintf(stderr, "No response from LVHV after HV set check\n");
-			return -6;	
+			fprintf(stderr, "Response doesn't make sense!\n");
+			return -5;	
 		}
-		c++;
+	}else if(retID == 0x031)
+	{
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense!\n");
+			return -5;	
+		}
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after HV set check\n");
+		return -6;	
 	}
+
 	return retval;
 }
 
@@ -610,48 +614,44 @@ int Canbus::GetHV_ONOFF(){
 		return retval;	
 	}
 
-	int c=0;
 	char* rec_message;
-	while(c<100)
-	{
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}	
-	
-	
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
 
-		if(retID == 0x035)
-		{	
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense!\n");
-				return -5;	
-			}
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}	
+
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
+
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x035)
+	{	
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else if(retMSG == 0x0001000100010001)
+		{
+			return 1;
 		}else
 		{
-			fprintf(stderr, "No response from LVHV after HV check\n");
-			return -6;	
+			fprintf(stderr, "Response doesn't make sense!\n");
+			return -5;	
 		}
-		c++;
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after HV check\n");
+		return -6;	
 	}
+
 	return HV_state;
 }
 
@@ -681,54 +681,50 @@ int Canbus::SetLV(bool state){
 		return retval;	
 	}
 
-	int c=0;
 	char* rec_message;
-	while(c<100)
-	{
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}
-	
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
 
-		if(retID == 0x021)
-		{	
-			if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
-				return -5;	
-			}
-		}else if(retID == 0x011)
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
+
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x021)
+	{	
+		if(retMSG == 0x0001000100010001)
 		{
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
-				return -5;	
-			}
+			return 1;
 		}else
 		{
-			fprintf(stderr, "No response from LVHV after LV set check\n");
-			return -6;	
+			fprintf(stderr, "Response doesn't make sense! (LV set 021#)\n");
+			return -5;	
 		}
-		c++;
-	}	
+	}else if(retID == 0x011)
+	{
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else
+		{
+			fprintf(stderr, "Response doesn't make sense! (LV set 011#)\n");
+			return -5;	
+		}
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after LV set check\n");
+		return -6;	
+	}
+	
 	return retval;
 }
 
@@ -748,47 +744,44 @@ int Canbus::GetLV_ONOFF(){
 		return retval;	
 	}
 
-	int c=0;
-	char* rec_message;
-	while(c<100)
-	{
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}	
-	
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
 
-		if(retID == 0x220)
-		{	
-			if(retMSG == 0x0000000000000000)
-			{
-				return 0;
-			}else if(retMSG == 0x0001000100010001)
-			{
-				return 1;
-			}else
-			{
-				fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
-				return -5;	
-			}
+	char* rec_message;
+
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}	
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
+
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x220)
+	{	
+		if(retMSG == 0x0000000000000000)
+		{
+			return 0;
+		}else if(retMSG == 0x0001000100010001)
+		{
+			return 1;
 		}else
 		{
-			fprintf(stderr, "No response from LVHV after LV check\n");
-			return -6;
+			fprintf(stderr, "Response doesn't make sense! (LV get 220#)\n");
+			return -5;	
 		}
-		c++;
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after LV check\n");
+		return -6;
 	}
+
 	return LV_state;
 }
 
@@ -808,56 +801,53 @@ vector<float> Canbus::GetLV_voltage(){
 		return {(float)retval,(float)retval,(float)retval};	
 	}
 
-	int c=0;
-	char* rec_message;
-	while(c<100)
-	{
-		rec_message = ReceiveMessage(id);
-		if(strlen(rec_message)<=0)
-		{
-			c++;
-			continue;
-		}		
-	
-		//back parse message to state
-		unsigned int retID = parseResponseID(rec_message);
-		unsigned long long retMSG = parseResponseMSG(rec_message);
-		
-		std::cout << "--------------- Control Window----------------" << std::endl;
-		printf("%s\n", rec_message);
-		printf("ID: 0x%03x\n", retID);
-		printf("MSG: 0x%0llx\n", retMSG);
-		std::cout << "----------------------------------------------" << std::endl;
 
-		if(retID == 0x3DA)
-		{	
-			unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
-			unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
-			unsigned int v12h = (retMSG & 0x000000000000FFFF);
-			
-			v33 = v33h*5/1000;;
-			if(v33>=0)
-			{
-				volts[0] = (v33);
-			}
-			v25 = v25h*5/1000;
-			if(v25>=0)
-			{
-				volts[1] = (v25);
-			}
-			v12 = v12h*5/1000;
-			if(v12>=0)
-			{
-				volts[2] = (v12);
-			}
-			return volts;
-		}else
+	char* rec_message;
+
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}		
+
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);
+
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
+
+	if(retID == 0x3DA)
+	{	
+		unsigned int v33h = ((retMSG & 0xFFFF000000000000) >> 48);
+		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
+		unsigned int v12h = (retMSG & 0x000000000000FFFF);
+
+		v33 = v33h*5/1000;;
+		if(v33>=0)
 		{
-			fprintf(stderr, "No response from LVHV after LV voltage check\n");
-			return {-6,-6,-6};
+			volts[0] = (v33);
 		}
-		c++;
+		v25 = v25h*5/1000;
+		if(v25>=0)
+		{
+			volts[1] = (v25);
+		}
+		v12 = v12h*5/1000;
+		if(v12>=0)
+		{
+			volts[2] = (v12);
+		}
+		return volts;
+	}else
+	{
+		fprintf(stderr, "No response from LVHV after LV voltage check\n");
+		return {-6,-6,-6};
 	}
+
 	return volts;
 }
 
