@@ -35,6 +35,8 @@
 #define RLY1 25
 #define RLY2 28
 #define RLY3 29
+#define TIMEOUT_RS 10000
+#define TIMEOUT_ITER 10
 
 using namespace std;
 
