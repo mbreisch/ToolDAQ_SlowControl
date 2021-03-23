@@ -188,8 +188,9 @@ float Canbus::GetPhotodiode()
 		return retval;	
 	}
 
+	usleep(10000);
+	
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
@@ -401,8 +402,9 @@ vector<float> Canbus::GetTemp()
 		return {(float)retval,(float)retval};	
 	}
 
+	usleep(10000);
+	
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
@@ -473,9 +475,10 @@ int Canbus::SetHV_ONOFF(bool state){
 	{
 		return retval;	
 	}
+	
+	usleep(10000);
 
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
@@ -614,8 +617,9 @@ int Canbus::GetHV_ONOFF(){
 		return retval;	
 	}
 
+	usleep(10000);
+	
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
@@ -681,8 +685,9 @@ int Canbus::SetLV(bool state){
 		return retval;	
 	}
 
+	usleep(10000);
+	
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
@@ -744,9 +749,9 @@ int Canbus::GetLV_ONOFF(){
 		return retval;	
 	}
 
+	usleep(10000);
 
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
@@ -801,9 +806,9 @@ vector<float> Canbus::GetLV_voltage(){
 		return {(float)retval,(float)retval,(float)retval};	
 	}
 
-
+	usleep(10000);
+	
 	char* rec_message;
-
 	rec_message = ReceiveMessage(id,msg);
 	if(strlen(rec_message)<=0)
 	{
