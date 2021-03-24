@@ -17,7 +17,7 @@ bool Canbus::Connect(){
 	
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
-
+	
   	if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
 	{
 		perror("bind");
@@ -109,54 +109,96 @@ int Canbus::SendMessage(unsigned int id, unsigned long long msg){
 
 char* Canbus::ReceiveMessage(unsigned int id, unsigned long long msg){
 	
+	//Prepare an empty message for error handling
+	char *empty; empty = (char*) malloc(256);
+	
+	//Connect to the socket
 	if(!Connect())
 	{
 		fprintf(stderr, "Could not connection on read!\n\n");	
-		return "";	
+		return empty;	
 	}
 	
+	//Prepare help variables for select()
 	int counter=0;
-	//Recieve sensor data 
+	fd_set rfds;
+	struct timeval tv;
+	int retval;
+	
+	//Prepare message variables
 	char rec_id[5];
 	char rec_temp[3];
 	char *rec_message; rec_message = (char*) malloc(256);
 	
+	//Prepare the byte counter
 	nbytes=0;
-	while(nbytes==0)
+	
+	//Start a listen loop
+	while(true)
 	{
-		usleep(TIMEOUT_ITER);
+		//If enough attempts at a read were made re-send the message
 		if(counter==100)
 		{
+			//Preperation
+			Disconnect();
 			counter=0;
-			SendMessage(id,msg);
-			usleep(TIMEOUT_RS);
+			//Send the message again
+			if((retval=SendMessage(id,msg))!=0)
+			{
+				fprintf(stderr, "Could not re-send on read attempt!\n\n");
+				return empty;
+			}
+			//Reconnect for read
+			if(!Connect())
+			{
+				fprintf(stderr, "Could not connection on read!\n\n");	
+				return empty;	
+			}
 		}
 		
-		if((nbytes = read(s, &frame, sizeof(struct canfd_frame)))<0){
-			fprintf(stderr, "Read error!\n\n");	
-			return rec_message;
+		//Get the select ready
+		FD_ZERO(&rfds);
+		FD_SET(s, &rfds);
+		//Wait for x [s] and y [us]
+		tv.tv_sec = 0;
+		tv.tv_usec = 1000;
+		
+		//Monitor the 's' socket, for a time tv  
+		retval = select(s+1, &rfds, NULL, NULL, &tv);
+
+		//Depending on the retval do things:
+		if (retval == -1)
+		{
+			perror("select() got compelte error -1!");
+		}else if(retval)
+		{
+			nbytes = read(s, &frame, sizeof(struct canfd_frame));
 		}
-		if(nbytes==0)
+
+		if(nbytes<=0)
 		{
 			counter++;
 			continue;
 		}
-	
+
 		sprintf(rec_id,"%03X%c",frame.can_id,'#');
 		rec_id[4] = '\0';
 		strcpy(rec_message,rec_id);
 		unsigned int num =  frame.len;
-		for (int i = 0; i < num; i++){
+		for (int i = 0; i < num; i++)
+		{
 			sprintf(rec_temp,"%02X",frame.data[i]);
 			strcat(rec_message,rec_temp);
 		}
-		
-		if(id == parseResponseID(rec_message))
+		unsigned int pID = parseResponseID(rec_message);
+
+		if(id == pID)
 		{
 			memset(rec_id, 0, sizeof rec_id);
 			memset(rec_temp, 0, sizeof rec_temp);
 			memset(rec_message, 0, sizeof rec_message);
 			counter++;
+			nbytes=0;
 			continue;
 		}else{
 			break;
@@ -167,6 +209,8 @@ char* Canbus::ReceiveMessage(unsigned int id, unsigned long long msg){
 	
 	return rec_message;
 }
+
+
 //gets the photodiode light level
 //returns 
 //-n for fail
