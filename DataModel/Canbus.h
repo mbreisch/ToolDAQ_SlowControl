@@ -16,7 +16,10 @@
 
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <net/if.h>
+#include <fcntl.h>
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
@@ -35,8 +38,8 @@
 #define RLY1 25
 #define RLY2 28
 #define RLY3 29
-#define TIMEOUT_RS 10000
-#define TIMEOUT_ITER 10
+#define TIMEOUT_RS 1
+
 
 using namespace std;
 
