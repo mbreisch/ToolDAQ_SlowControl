@@ -1,7 +1,7 @@
 verbose 9
 LV_state_set 1
 HV_state_set 0
-HV_volts 100
+HV_volts 0
 relayCh1 0
 relayCh2 0
 relayCh3 0
