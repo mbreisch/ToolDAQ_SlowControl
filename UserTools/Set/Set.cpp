@@ -200,7 +200,7 @@ bool Set::Execute(){
 		if(m_data->SCMonitor.Trig0_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
 		{
 			retval = m_data->CB->SetTriggerDac0(m_data->SCMonitor.Trig0_threshold, m_data->SCMonitor.TrigVref);
-			if(retval!=1)
+			if(retval!=0)
 			{
 				std::cout << " There was an error (DAC0) with retval: " << retval << std::endl;
 			}
@@ -213,7 +213,7 @@ bool Set::Execute(){
 		if(m_data->SCMonitor.Trig1_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
 		{
 			retval = m_data->CB->SetTriggerDac1(m_data->SCMonitor.Trig1_threshold, m_data->SCMonitor.TrigVref);
-			if(retval!=1)
+			if(retval!=0)
 			{
 				std::cout << " There was an error (DAC1) with retval: " << retval << std::endl;
 			}
