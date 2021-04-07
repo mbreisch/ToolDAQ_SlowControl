@@ -264,15 +264,36 @@ float Canbus::GetPhotodiode()
 
 //----check-----
 float Canbus::GetTriggerDac0(float VREF)
-{/*
+{
+	int retval;
 	unsigned int id = 0x0BC;
 	unsigned long long msg = 0x0000000000000000;
 
 	//send & read
+	retval = SendMessage(id,msg);
+	if(retval!=0)
+	{
+		return retval;	
+	}
 
+	usleep(TIMEOUT_RS);
+	
+	char* rec_message;
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}
+	
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
 
 	if(retID == 0x0CB)
 	{
@@ -286,21 +307,43 @@ float Canbus::GetTriggerDac0(float VREF)
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after DAC0 check\n");
-		return 5;		
+		return -5;		
 	}
-*/}
+	return -7;
+}
 
 //----check-----
 float Canbus::GetTriggerDac1(float VREF)
-{/*
+{
+	int retval;
 	unsigned int id = 0x0EF;
 	unsigned long long msg = 0x0000000000000000;
 
 	//send & read
+	retval = SendMessage(id,msg);
+	if(retval!=0)
+	{
+		return retval;	
+	}
 
+	usleep(TIMEOUT_RS);
+	
+	char* rec_message;
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}
+	
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
 
 	if(retID == 0x0FE)
 	{
@@ -314,13 +357,14 @@ float Canbus::GetTriggerDac1(float VREF)
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after DAC1 check\n");
-		return 5;		
+		return -5;		
 	}
-*/}
+	return -7;
+}
 
 //----check-----
 int Canbus::SetTriggerDac0(float threshold, float VREF)
-{/*
+{
 	unsigned int id = 0x0AB;
 	unsigned long long msg = 0x0000000000000000;
 	int retval;
@@ -341,10 +385,30 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	msg = msg | (tmp<<48);
 
 	//send & read
+	retval = SendMessage(id,msg);
+	if(retval!=0)
+	{
+		return retval;	
+	}
 
+	usleep(TIMEOUT_RS);
+	
+	char* rec_message;
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}
+	
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;	
 
 	//Analize response
 	if(retID == 0x0BA)
@@ -353,27 +417,27 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 		{
 			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 			float result = value*VREF/4095;
-			if(result == threshold)
+			if(abs(result-threshold)<0.0000001)
 			{
 				return 0;
 			}else
 			{
 				std::cout << "Result was " << result << std::endl;
-				return 6;
+				return -6;
 			}
 		}
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after DAC0 check\n");
-		return 5;		
+		return -5;		
 	}
 
-	return retval;
-*/}
+	return -7;
+}
 
 //----check-----
 int Canbus::SetTriggerDac1(float threshold, float VREF)
-{/*
+{
 	unsigned int id = 0x0DE;
 	unsigned long long msg = 0x0000000000000000;
 	int retval;
@@ -394,6 +458,30 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	msg = msg | (tmp<<48);
 
 	//send & read
+	retval = SendMessage(id,msg);
+	if(retval!=0)
+	{
+		return retval;	
+	}
+
+	usleep(TIMEOUT_RS);
+	
+	char* rec_message;
+	rec_message = ReceiveMessage(id,msg);
+	if(strlen(rec_message)<=0)
+	{
+		rec_message = ReceiveMessage(id,msg);
+	}
+	
+	//back parse message to state
+	unsigned int retID = parseResponseID(rec_message);
+	unsigned long long retMSG = parseResponseMSG(rec_message);	
+	
+	std::cout << "--------------- Control Window----------------" << std::endl;
+	printf("%s\n", rec_message);
+	printf("ID: 0x%03x\n", retID);
+	printf("MSG: 0x%0llx\n", retMSG);
+	std::cout << "----------------------------------------------" << std::endl;
 
 	//back parse message to state
 	unsigned int retID = parseResponseID(rec_message);
@@ -412,17 +500,17 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 			}else
 			{
 				std::cout << "Result was " << result << std::endl;
-				return 6;
+				return -6;
 			}
 		}
 	}else
 	{
 		fprintf(stderr, "No response from LVHV after DAC1 check\n");
-		return 5;		
+		return -5;		
 	}
 
-	return retval;
-*/}
+	return -7;
+}
 
 
 //Gets the readout from the temperature &
