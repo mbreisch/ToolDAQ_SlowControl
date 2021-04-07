@@ -483,10 +483,6 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	printf("MSG: 0x%0llx\n", retMSG);
 	std::cout << "----------------------------------------------" << std::endl;
 
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
-
 	//Analize response
 	if(retID == 0x0ED)
 	{
