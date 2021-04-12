@@ -383,55 +383,56 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	tmp = std::stoull(ss.str(),nullptr,16);
 
 	msg = msg | (tmp<<48);
-
-	//send & read
-	retval = SendMessage(id,msg);
-	if(retval!=0)
+	while(true)
 	{
-		return retval;	
-	}
-
-	usleep(TIMEOUT_RS);
-	
-	char* rec_message;
-	rec_message = ReceiveMessage(id,msg);
-	if(strlen(rec_message)<=0)
-	{
-		rec_message = ReceiveMessage(id,msg);
-	}
-	
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
-	
-	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n", rec_message);
-	printf("ID: 0x%03x\n", retID);
-	printf("MSG: 0x%0llx\n", retMSG);
-	std::cout << "----------------------------------------------" << std::endl;	
-
-	//Analize response
-	if(retID == 0x0BA)
-	{
-		if((retMSG>>56)==0xC0)
+		//send & read
+		retval = SendMessage(id,msg);
+		if(retval!=0)
 		{
-			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-			float result = value*VREF/4095;
-			if(abs(result-threshold)<0.0000001)
-			{
-				return 0;
-			}else
-			{
-				std::cout << "Result was " << result << std::endl;
-				return -6;
-			}
+			return retval;	
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after DAC0 check\n");
-		return -5;		
-	}
 
+		usleep(TIMEOUT_RS);
+
+		char* rec_message;
+		rec_message = ReceiveMessage(id,msg);
+		if(strlen(rec_message)<=0)
+		{
+			rec_message = ReceiveMessage(id,msg);
+		}
+
+		//back parse message to state
+		unsigned int retID = parseResponseID(rec_message);
+		unsigned long long retMSG = parseResponseMSG(rec_message);	
+
+		std::cout << "--------------- Control Window----------------" << std::endl;
+		printf("%s\n", rec_message);
+		printf("ID: 0x%03x\n", retID);
+		printf("MSG: 0x%0llx\n", retMSG);
+		std::cout << "----------------------------------------------" << std::endl;	
+
+		//Analize response
+		if(retID == 0x0BA)
+		{
+			if((retMSG>>56)==0xC0)
+			{
+				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+				float result = value*VREF/4095;
+				if(abs(result-threshold)<0.0000001)
+				{
+					return 0;
+				}else
+				{
+					std::cout << "Result was " << result << std::endl;
+					return -6;
+				}
+			}
+		}else
+		{
+			fprintf(stderr, "No response from LVHV after DAC0 check\n");
+			return -5;		
+		}
+	}
 	return -7;
 }
 
@@ -457,54 +458,57 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 
 	msg = msg | (tmp<<48);
 
-	//send & read
-	retval = SendMessage(id,msg);
-	if(retval!=0)
-	{
-		return retval;	
-	}
-
-	usleep(TIMEOUT_RS);
 	
-	char* rec_message;
-	rec_message = ReceiveMessage(id,msg);
-	if(strlen(rec_message)<=0)
+	while(true)
 	{
-		rec_message = ReceiveMessage(id,msg);
-	}
-	
-	//back parse message to state
-	unsigned int retID = parseResponseID(rec_message);
-	unsigned long long retMSG = parseResponseMSG(rec_message);	
-	
-	std::cout << "--------------- Control Window----------------" << std::endl;
-	printf("%s\n", rec_message);
-	printf("ID: 0x%03x\n", retID);
-	printf("MSG: 0x%0llx\n", retMSG);
-	std::cout << "----------------------------------------------" << std::endl;
-
-	//Analize response
-	if(retID == 0x0ED)
-	{
-		if((retMSG>>56)==0xC0)
+		//send & read
+		retval = SendMessage(id,msg);
+		if(retval!=0)
 		{
-			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
-			float result = value*VREF/4095;
-			if(abs(result-threshold)<0.0000001)
-			{
-				return 0;
-			}else
-			{
-				std::cout << "Result was " << result << std::endl;
-				return -6;
-			}
+			return retval;	
 		}
-	}else
-	{
-		fprintf(stderr, "No response from LVHV after DAC1 check\n");
-		return -5;		
-	}
 
+		usleep(TIMEOUT_RS);
+
+		char* rec_message;
+		rec_message = ReceiveMessage(id,msg);
+		if(strlen(rec_message)<=0)
+		{
+			rec_message = ReceiveMessage(id,msg);
+		}
+
+		//back parse message to state
+		unsigned int retID = parseResponseID(rec_message);
+		unsigned long long retMSG = parseResponseMSG(rec_message);	
+
+		std::cout << "--------------- Control Window----------------" << std::endl;
+		printf("%s\n", rec_message);
+		printf("ID: 0x%03x\n", retID);
+		printf("MSG: 0x%0llx\n", retMSG);
+		std::cout << "----------------------------------------------" << std::endl;
+
+		//Analize response
+		if(retID == 0x0ED)
+		{
+			if((retMSG>>56)==0xC0)
+			{
+				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
+				float result = value*VREF/4095;
+				if(abs(result-threshold)<0.0000001)
+				{
+					return 0;
+				}else
+				{
+					std::cout << "Result was " << result << std::endl;
+					return -6;
+				}
+			}
+		}else
+		{
+			fprintf(stderr, "No response from LVHV after DAC1 check\n");
+			return -5;		
+		}
+	}
 	return -7;
 }
 
