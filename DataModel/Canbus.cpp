@@ -297,7 +297,7 @@ float Canbus::GetTriggerDac0(float VREF)
 
 	if(retID == 0x0CB)
 	{
-		if((retMSG>>56)==0xC0 || (retMSG>>56)==0x40)
+		if((retMSG>>56)==0xC0)
 		{
 			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 			float result = value*VREF/4095;
@@ -347,7 +347,7 @@ float Canbus::GetTriggerDac1(float VREF)
 
 	if(retID == 0x0FE)
 	{
-		if((retMSG>>56)==0xC0 || (retMSG>>56)==0x40)
+		if((retMSG>>56)==0xC0)
 		{
 			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 			float result = value*VREF/4095;
@@ -414,7 +414,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 		//Analize response
 		if(retID == 0x0BA)
 		{
-			if((retMSG>>56)==0xC0)
+			if((retMSG>>56)==0xC0 || (retMSG>>56)==0x40)
 			{
 				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 				float result = value*VREF/4095;
@@ -490,7 +490,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 		//Analize response
 		if(retID == 0x0ED)
 		{
-			if((retMSG>>56)==0xC0)
+			if((retMSG>>56)==0xC0 || (retMSG>>56)==0x40)
 			{
 				unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 				float result = value*VREF/4095;
