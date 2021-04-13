@@ -191,6 +191,7 @@ bool Set::Execute(){
 
 
 		//------------------------------------Triggerboard Control
+		float tempval;
 		std::cout << "What value is the triggerboard reference value in [V]? | " ;
 		std::cin >> m_data->SCMonitor.TrigVref;
 		cin.ignore(numeric_limits<streamsize>::max(),'\n');
@@ -204,6 +205,14 @@ bool Set::Execute(){
 			{
 				std::cout << " There was an error (DAC0) with retval: " << retval << std::endl;
 			}
+			tempval = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
+			if(abs(tempval - m_data->SCMonitor.Trig0_threshold)<0.000000001)
+			{
+				m_data->SCMonitor.Trig0_mon = tempval;
+			}else
+			{
+				std::cout << " There was an error (DAC0) - 0xC0 hasn't been updated!" << std::endl;
+			}
 		}
 
 
@@ -216,6 +225,14 @@ bool Set::Execute(){
 			if(retval!=0)
 			{
 				std::cout << " There was an error (DAC1) with retval: " << retval << std::endl;
+			}
+			tempval = m_data->CB->GetTriggerDac1(m_data->SCMonitor.TrigVref);
+			if(abs(tempval - m_data->SCMonitor.Trig1_threshold)<0.000000001)
+			{
+				m_data->SCMonitor.Trig1_mon = tempval;
+			}else
+			{
+				std::cout << " There was an error (DAC1) - 0xC0 hasn't been updated!" << std::endl;
 			}
 		} 
 		m_data->SCMonitor.recieveFlag=2;
