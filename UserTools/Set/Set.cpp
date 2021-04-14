@@ -206,7 +206,7 @@ bool Set::Execute(){
 				std::cout << " There was an error (DAC0) with retval: " << retval << std::endl;
 			}
 			tempval = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
-			if(abs(tempval - m_data->SCMonitor.Trig0_threshold)<0.000000001)
+			if(std::abs(tempval - m_data->SCMonitor.Trig0_threshold)<0.000000001)
 			{
 				m_data->SCMonitor.Trig0_mon = tempval;
 			}else
@@ -227,7 +227,7 @@ bool Set::Execute(){
 				std::cout << " There was an error (DAC1) with retval: " << retval << std::endl;
 			}
 			tempval = m_data->CB->GetTriggerDac1(m_data->SCMonitor.TrigVref);
-			if(abs(tempval - m_data->SCMonitor.Trig1_threshold)<0.000000001)
+			if(std::abs(tempval - m_data->SCMonitor.Trig1_threshold)<0.000000001)
 			{
 				m_data->SCMonitor.Trig1_mon = tempval;
 			}else
