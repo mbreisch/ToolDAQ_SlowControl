@@ -375,7 +375,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	}
 
   	int k = 0;
-  	k = (int)(threshold * 4095. / VREF);
+  	k = (int)(threshold * 4096. / VREF);
 
 	stringstream ss;
 	ss << std::hex << (k);
@@ -448,7 +448,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	}
 
   	int k = 0;
-  	k = (int)(threshold * 4095. / VREF);
+  	k = (int)(threshold * 4096. / VREF);
 
 	stringstream ss;
 	ss << std::hex << (k);
