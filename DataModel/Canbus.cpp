@@ -382,7 +382,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	unsigned long long tmp = 0x0000000000000000;
 	tmp = std::stoull(ss.str(),nullptr,16);
 
-	msg = msg | (tmp<<48);
+	msg = msg | (tmp<<52);
 
 	//send & read
 	retval = SendMessage(id,msg);
@@ -455,7 +455,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	unsigned long long tmp = 0x0000000000000000;
 	tmp = std::stoull(ss.str(),nullptr,16);
 
-	msg = msg | (tmp<<48);
+	msg = msg | (tmp<<52);
 
 	//send & read
 	retval = SendMessage(id,msg);
