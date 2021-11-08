@@ -33,7 +33,7 @@ bool Poll::Execute(){
   //HV
   int HVstate = m_data->CB->GetHV_ONOFF();
   m_data->SCMonitor.HV_mon = HVstate;
-
+  m_data->SCMonitor.HV_return_mon = m_data->CB->ReturnedHvValue;
 
   //RHT
   vector<float> RHT = m_data->CB->GetTemp();
