@@ -79,6 +79,7 @@ class SlowControlMonitor : public SerialisableObject{
   ar & HV_mon;
   ar & HV_state_set;
   ar & HV_volts;
+  ar & HV_return_mon;
   ar & LV_mon;
   ar & LV_state_set;
   ar & v33;
