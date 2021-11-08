@@ -763,12 +763,22 @@ int Canbus::GetHV_ONOFF(){
 
 	if(retID == 0x035)
 	{	
-		if(retMSG == 0x0000000000000000)
+		unsigned int state = (retMSG & 0x0001000000000000) >> 48;
+		if(state==0)
 		{
 			return 0;
-		}else if(retMSG == 0x0001000100010001)
+		}else if(state==1)
 		{
-			return 1;
+		    	unsigned int HVval = (retMSG & 0xffff);
+		    	unsigned int HVval2 = (retMSG & 0xffff000000) >> 24;
+			if(HVval==HVval2)
+			{
+				ReturnedHvValue = HVval*CONVERSION;
+				return 1;
+			}else
+			{
+				return -5;
+			}
 		}else
 		{
 			fprintf(stderr, "Response doesn't make sense!\n");
