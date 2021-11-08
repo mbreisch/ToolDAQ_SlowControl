@@ -14,6 +14,8 @@ bool SlowControlMonitor::Send_Mon(zmq::socket_t* sock){
 	std::memcpy(msg2.data(), &temperature_mon, sizeof temperature_mon);
 	zmq::message_t msg3(sizeof HV_mon);
 	std::memcpy(msg3.data(), &HV_mon, sizeof HV_mon);
+	zmq::message_t msg31(sizeof HV_return_mon);
+	std::memcpy(msg31.data(), &HV_return_mon, sizeof HV_return_mon);
 	zmq::message_t msg4(sizeof LV_mon);
 	std::memcpy(msg4.data(), &LV_mon, sizeof LV_mon);
 	zmq::message_t msg5(sizeof FLAG_temperature);
@@ -39,11 +41,11 @@ bool SlowControlMonitor::Send_Mon(zmq::socket_t* sock){
 	zmq::message_t msg15(sizeof light);
 	std::memcpy(msg15.data(), &light, sizeof light);
 
-
 	sock->send(msg0,ZMQ_SNDMORE);
 	sock->send(msg1,ZMQ_SNDMORE);
 	sock->send(msg2,ZMQ_SNDMORE);
 	sock->send(msg3,ZMQ_SNDMORE);
+	sock->send(msg31,ZMQ_SNDMORE);
 	sock->send(msg4,ZMQ_SNDMORE);
 	sock->send(msg5,ZMQ_SNDMORE);
 	sock->send(msg6,ZMQ_SNDMORE);
@@ -77,6 +79,8 @@ bool SlowControlMonitor::Receive_Mon(zmq::socket_t* sock){
   //HV/LV
   sock->recv(&msg);   
   HV_mon=*(reinterpret_cast<int*>(msg.data()));
+  sock->recv(&msg);   
+  HV_return_mon=*(reinterpret_cast<float*>(msg.data()));
   sock->recv(&msg);  
   LV_mon=*(reinterpret_cast<int*>(msg.data()));
 
