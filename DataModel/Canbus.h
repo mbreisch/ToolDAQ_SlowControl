@@ -39,6 +39,7 @@
 #define RLY2 28
 #define RLY3 29
 #define TIMEOUT_RS 1
+#define CONVERSION 0.00518
 
 
 using namespace std;
@@ -67,6 +68,7 @@ public:
 	int SetHV_voltage(float volts); //done
 	int GetHV_ONOFF(); //done
 	float get_HV_volts = 0;
+	float ReturnedHvValue;
 
 	//RHT
 	vector<float> GetTemp(); //done
