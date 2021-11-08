@@ -250,7 +250,7 @@ float Canbus::GetPhotodiode()
 	if(retID == 0x0D0)
 	{
 		unsigned int lighth = ((retMSG & 0xFFFF000000000000) >> 48);
-		light = lighth*5/1000;
+		light = lighth*CONVERSION;
 
 		return light;
 	}else
@@ -965,17 +965,17 @@ vector<float> Canbus::GetLV_voltage(){
 		unsigned int v25h = ((retMSG & 0x000000FFFF000000) >> 24);
 		unsigned int v12h = (retMSG & 0x000000000000FFFF);
 
-		v33 = v33h*5/1000;;
+		v33 = v33h*CONVERSION;
 		if(v33>=0)
 		{
 			volts[0] = (v33);
 		}
-		v25 = v25h*5/1000;
+		v25 = v25h*CONVERSION;
 		if(v25>=0)
 		{
 			volts[1] = (v25);
 		}
-		v12 = v12h*5/1000;
+		v12 = v12h*CONVERSION;
 		if(v12>=0)
 		{
 			volts[2] = (v12);
