@@ -32,7 +32,7 @@ bool Recieve::Execute(){
   int timer;
   if(m_data->SCMonitor.recieveFlag==0)
   {
-    timer = -1;
+    timer = 1;
   }else
   {
     timer = 100;
