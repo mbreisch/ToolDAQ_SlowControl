@@ -417,7 +417,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 		{
 			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 			float result = value*VREF/4095;
-			if(abs(result-threshold)<0.0000001)
+			if(abs(result-threshold)<0.001)
 			{
 				return 0;
 			}else
@@ -490,7 +490,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 		{
 			unsigned int value = (retMSG & 0x00FFF00000000000) >> 44;
 			float result = value*VREF/4095;
-			if(abs(result-threshold)<0.0000001)
+			if(abs(result-threshold)<0.001)
 			{
 				return 0;
 			}else
