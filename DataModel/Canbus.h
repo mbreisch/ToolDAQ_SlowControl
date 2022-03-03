@@ -68,7 +68,7 @@ public:
 	int SetHV_voltage(float volts); //done
 	int GetHV_ONOFF(); //done
 	float get_HV_volts = 0;
-	float ReturnedHvValue;
+	float ReturnedHvValue=0;
 
 	//RHT
 	vector<float> GetTemp(); //done
