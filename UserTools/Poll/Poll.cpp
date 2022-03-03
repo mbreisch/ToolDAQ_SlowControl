@@ -55,7 +55,7 @@ bool Poll::Execute(){
   m_data->SCMonitor.light = m_data->CB->GetPhotodiode();
   
   m_data->SCMonitor.Print();
-  usleep(1000000);
+  usleep(10000000);
 
   return true;
 }
