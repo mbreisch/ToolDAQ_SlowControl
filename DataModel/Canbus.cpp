@@ -716,6 +716,7 @@ int Canbus::SetHV_voltage(float volts){
 		std::cout << "------------ Control Window: HV value send -----" << std::endl;
 		printf("ID 0x%03x\n",id);
 		printf("MSG 0x%0llx\n",msg);
+		std::cout << " Voltage set = " << volts << " | Currently is: " << vset << "|" << volts << std::endl;
 		std::cout << "------------------------------------------------" << std::endl;
 		if(retval!=0)
 		{
