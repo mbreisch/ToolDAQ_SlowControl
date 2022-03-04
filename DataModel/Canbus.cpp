@@ -241,7 +241,7 @@ float Canbus::GetPhotodiode()
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Light -----------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -289,7 +289,7 @@ float Canbus::GetTriggerDac0(float VREF)
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
 	
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Get DAC0---------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -339,7 +339,7 @@ float Canbus::GetTriggerDac1(float VREF)
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
 	
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Get DAC1---------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -404,7 +404,7 @@ int Canbus::SetTriggerDac0(float threshold, float VREF)
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Set DAC0 -----------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -477,7 +477,7 @@ int Canbus::SetTriggerDac1(float threshold, float VREF)
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);	
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Set DAC1 -----------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -539,7 +539,7 @@ vector<float> Canbus::GetTemp()
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Get Temp/Hum-----" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -613,7 +613,7 @@ int Canbus::SetHV_ONOFF(bool state){
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Set HV ON/OFF----" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -713,6 +713,10 @@ int Canbus::SetHV_voltage(float volts){
 		msg = msg | (tmp<<48);
 
 		int retval = SendMessage(id,msg);
+		std::cout << "------------ Control Window: HV value send -----" << std::endl;
+		printf("ID 0x%03x\n",id);
+		printf("MSG 0x%0llx\n",msg);
+		std::cout << "------------------------------------------------" << std::endl;
 		if(retval!=0)
 		{
 			return retval;	
@@ -755,7 +759,7 @@ int Canbus::GetHV_ONOFF(){
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Get HV Data -----" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -832,7 +836,7 @@ int Canbus::SetLV(bool state){
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Set LV ----------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -896,7 +900,7 @@ int Canbus::GetLV_ONOFF(){
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Get LV ----------" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
@@ -953,7 +957,7 @@ vector<float> Canbus::GetLV_voltage(){
 	unsigned int retID = parseResponseID(rec_message);
 	unsigned long long retMSG = parseResponseMSG(rec_message);
 
-	std::cout << "--------------- Control Window----------------" << std::endl;
+	std::cout << "------------ Control Window: Set V values-----" << std::endl;
 	printf("%s\n", rec_message);
 	printf("ID: 0x%03x\n", retID);
 	printf("MSG: 0x%0llx\n", retMSG);
