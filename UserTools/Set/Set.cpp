@@ -242,6 +242,20 @@ bool Set::Execute(){
 
 bool Set::Finalise(){
 
-  m_data->CB->get_HV_volts = 0;
-  return true;
+	if(m_data->CB->get_HV_volts!=0)
+	{
+		retval = m_data->CB->SetHV_voltage(0.0);
+		if(retval==0)
+		{
+			m_data->CB->get_HV_volts = 0;
+			std::fstream outfile("./configfiles/BreakOutBox/LastHV.txt", std::ios_base::out | std::ios_base::trunc);
+			outfile << m_data->CB->get_HV_volts;
+			outfile.close();
+		}else
+		{
+			std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
+		}
+	}	
+	
+  	return true;
 }
