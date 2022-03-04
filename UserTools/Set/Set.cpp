@@ -143,9 +143,17 @@ bool Set::Execute(){
 
 		if(m_data->SCMonitor.HV_state_set==true)
 		{
-			std::cout << "What value do you want to set the HV to in [V]? | currently " << m_data->CB->get_HV_volts << " ";
+			std::cout << "What value do you want to set the HV to in [V]? | currently from file " << m_data->CB->get_HV_volts << " ";
 			std::cin >> m_data->SCMonitor.HV_volts;
 			cin.ignore(numeric_limits<streamsize>::max(),'\n');
+		}
+		int retstate = m_data->CB->GetHV_ONOFF();
+		m_data->SCMonitor.HV_return_mon = m_data->CB->ReturnedHvValue;
+		if(abs(m_data->CB->get_HV_volts-m_data->SCMonitor.HV_return_mon)>0.1)
+		{
+			std::cout << "ERROR! " << "File gave " << m_data->CB->get_HV_volts << " Readback gave " << m_data->SCMonitor.HV_return_mon << std::endl;
+			std::cout << "Setting them as the read back value" << std::endl;
+			m_data->CB->get_HV_volts = m_data->SCMonitor.HV_return_mon;
 		}
 		if(m_data->SCMonitor.HV_volts!=m_data->CB->get_HV_volts)
 		{
