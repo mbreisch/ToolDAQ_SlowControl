@@ -241,7 +241,7 @@ bool Set::Execute(){
 }
 
 bool Set::Finalise(){
-
+/*
 	if(m_data->CB->get_HV_volts!=0)
 	{
 		retval = m_data->CB->SetHV_voltage(0.0);
@@ -256,6 +256,7 @@ bool Set::Finalise(){
 			std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
 		}
 	}	
-	
+*/	
+	m_data->CB->get_HV_volts = 0;
   	return true;
 }
