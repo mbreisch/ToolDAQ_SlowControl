@@ -773,11 +773,11 @@ int Canbus::GetHV_ONOFF(){
 			return 0;
 		}else if(state==1)
 		{
-		    	unsigned int HVval = (retMSG & 0xffff);
-		    	unsigned int HVval2 = (retMSG & 0xffff000000) >> 24;
+		    	unsigned long long HVval = (retMSG & 0xffff);
+		    	unsigned long long HVval2 = (retMSG & 0xffff000000) >> 24;
 			if(HVval==HVval2)
 			{
-				ReturnedHvValue = HVval*CONVERSION;
+				ReturnedHvValue = (double)HVval*CONVERSION;
 				return 1;
 			}else
 			{
