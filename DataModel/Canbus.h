@@ -38,7 +38,7 @@
 #define RLY1 25
 #define RLY2 28
 #define RLY3 29
-#define TIMEOUT_RS 1
+#define TIMEOUT_RS 100
 #define CONVERSION 0.00518
 
 
