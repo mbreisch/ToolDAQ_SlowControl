@@ -116,33 +116,6 @@ bool Set::Execute(){
 			}
 		}  
 
-		//------------------------------------LV Control
-		std::cout << "Do you want to turn LV on/off? 0:OFF , 1:ON | " ;
-		std::cin >> m_data->SCMonitor.LV_state_set;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		bool tempLVmon;
-		int tCB_LV = m_data->CB->GetLV_ONOFF();
-		if(tCB_LV==0)
-		{
-			tempLVmon = false;
-			m_data->SCMonitor.LV_mon = 0;
-		}else if(tCB_LV==1)
-		{
-			tempLVmon = true;
-			m_data->SCMonitor.LV_mon = 1;
-		}else
-		{
-			std::cout << "No read came in, retval: " << tCB_LV << std::endl;
-		}
-		if(m_data->SCMonitor.LV_state_set!=tempLVmon)
-		{
-			retval = m_data->CB->SetLV(m_data->SCMonitor.LV_state_set);
-			if(retval!=0 && retval!=1)
-			{
-				std::cout << " There was an error (Set LV) with retval: " << retval << std::endl;
-			}
-		}
-
 
 		//------------------------------------HV Control
 		std::cout << "Do you want to turn HV on/off? 0:OFF , 1:ON | " ;
@@ -186,6 +159,33 @@ bool Set::Execute(){
 			}else
 			{
 				std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
+			}
+		}
+		
+		//------------------------------------LV Control
+		std::cout << "Do you want to turn LV on/off? 0:OFF , 1:ON | " ;
+		std::cin >> m_data->SCMonitor.LV_state_set;
+		cin.ignore(numeric_limits<streamsize>::max(),'\n');
+		bool tempLVmon;
+		int tCB_LV = m_data->CB->GetLV_ONOFF();
+		if(tCB_LV==0)
+		{
+			tempLVmon = false;
+			m_data->SCMonitor.LV_mon = 0;
+		}else if(tCB_LV==1)
+		{
+			tempLVmon = true;
+			m_data->SCMonitor.LV_mon = 1;
+		}else
+		{
+			std::cout << "No read came in, retval: " << tCB_LV << std::endl;
+		}
+		if(m_data->SCMonitor.LV_state_set!=tempLVmon)
+		{
+			retval = m_data->CB->SetLV(m_data->SCMonitor.LV_state_set);
+			if(retval!=0 && retval!=1)
+			{
+				std::cout << " There was an error (Set LV) with retval: " << retval << std::endl;
 			}
 		}
 
