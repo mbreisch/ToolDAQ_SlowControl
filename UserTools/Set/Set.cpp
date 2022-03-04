@@ -143,7 +143,7 @@ bool Set::Execute(){
 
 		if(m_data->SCMonitor.HV_state_set==true)
 		{
-			std::cout << "What value do you want to set the HV to in [V]? | " ;
+			std::cout << "What value do you want to set the HV to in [V]? | currently " << m_data->CB->get_HV_volts << " ";
 			std::cin >> m_data->SCMonitor.HV_volts;
 			cin.ignore(numeric_limits<streamsize>::max(),'\n');
 		}
