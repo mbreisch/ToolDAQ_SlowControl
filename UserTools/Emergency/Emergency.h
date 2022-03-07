@@ -27,7 +27,7 @@ class Emergency: public Tool {
   bool Finalise(); ///< Finalise funciton used to clean up resorces.
 
   bool HUMIDITYCHK();
-  bool TMPCHK();
+  bool TEMPCHK();
 
  private:
 
