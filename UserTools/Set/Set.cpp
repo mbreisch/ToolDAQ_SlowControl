@@ -115,7 +115,8 @@ bool Set::Execute(){
 				std::cout << " There was an error (Relay 3) with retval: " << retval << std::endl;
 			}
 		}  
-
+		
+		retval = m_data->CB->SetLV(false);
 
 		//------------------------------------HV Control
 		std::cout << "Do you want to turn HV on/off? 0:OFF , 1:ON | " ;
