@@ -142,7 +142,7 @@ bool Set::Execute(){
 			}
 		}
 
-		if(m_data->SCMonitor.HV_state_set==true)
+		if(m_data->SCMonitor.HV_state_set==true||m_data->SCMonitor.HV_state_set==false)
 		{
 			std::cout << "What value do you want to set the HV to in [V]? | currently from file " << m_data->CB->get_HV_volts << " ";
 			std::cin >> m_data->SCMonitor.HV_volts;
