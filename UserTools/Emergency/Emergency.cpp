@@ -12,12 +12,6 @@ bool Emergency::Initialise(std::string configfile, DataModel &data){
   m_log= m_data->Log;
 
   if(!m_variables.Get("verbose",m_verbose)) m_verbose=1;
-
-  m_variables.Get("LIMIT_T_high",m_data->SCMonitor.LIMIT_temperature_high);
-  m_variables.Get("LIMIT_H_high",m_data->SCMonitor.LIMIT_humidity_high);
-  m_variables.Get("LIMIT_T_low",m_data->SCMonitor.LIMIT_temperature_low);
-  m_variables.Get("LIMIT_H_low",m_data->SCMonitor.LIMIT_humidity_low);
-  
   
   return true;
 }
