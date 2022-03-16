@@ -33,6 +33,7 @@ class Set: public Tool {
 
  private:
 
+ int retval;
  bool flag;
 
 
