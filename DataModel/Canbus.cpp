@@ -1082,13 +1082,45 @@ bool Canbus::GetRelayState(int idx){
 }
 
 /*ID 25: Get the Saltbridge state*/
-int Canbus::GetSaltbridge(){
-	return -444;
+float Canbus::GetSaltbridge()
+{
+	//init
+	string errmsg, target, serial;
+	YGenericSensor *tsensor;
+	
+	// Setup the API to use local USB devices
+	if (YAPI::RegisterHub("usb", errmsg) != YAPI::SUCCESS) 
+	{
+		cerr << "RegisterHub error: " << errmsg << endl;
+		return -111;
+	}
+	
+	//Get target device and sensor
+	target ="THRMSTR2-123456";
+	
+	tsensor = YGenericSensor::FirstGenericSensor();
+	if (!t->isOnline())
+	{
+		return -333;	
+	}else
+	{
+		tsensor = YGenericSensor::NextGenericSensor();	
+	}
+	serial = tsensor->get_module()->get_serialNumber();
+		 
+	float Resistance = t->get_currentRawValue();
+	string Unit = tsensort->get_unit()
+	
+	YAPI::FreeAPI();
+	
+	cout << "Unit for saltbridge is " << Unit << endl;
+
+	return Resistance;
 }
 
 /*ID 26: Get the thermistor value*/
-float Canbus::GetThermistor(){
-/*
+float Canbus::GetThermistor()
+{
 	//init
 	string errmsg, target, serial;
 	YTemperature *tsensor;
@@ -1102,28 +1134,20 @@ float Canbus::GetThermistor(){
 	
 	//Get target device and sensor
 	target ="THRMSTR2-123456";
-	YTemperature *t;
-	for(int i=1; i<4; i++)
+	
+	tsensor = YTemperature::FirstGenericSensor();
+	if (!t->isOnline())
 	{
-		tsensor = YTemperature::FindTemperature(target + ".temperature" + to_string(i));
-		serial = tsensor->get_module()->get_serialNumber();
-		t = YTemperature::FindTemperature(serial + ".temperature" + to_string(i));
-		if (!t->isOnline()) 
-		{
-			if(i==3)
-			{
-				cout << "Module not connected (check identification and USB cable)";
-				return -222;
-			}
-			continue;
-		}else
-		{
-			break;
-		}
+		return -333;	
 	}
+	serial = tsensor->get_module()->get_serialNumber();
+		 
+	float Temperature = t->get_currentRawValue();
+	string Unit = tsensort->get_unit()
+	
 	YAPI::FreeAPI();
+	
+	cout << "Unit for thermistor is " << Unit << endl;
 
-	return  (float) t->get_currentRawValue();
-	*/
-	return -444;
+	return Temperature;
 }
