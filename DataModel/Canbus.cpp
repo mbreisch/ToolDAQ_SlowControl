@@ -1104,15 +1104,15 @@ float Canbus::GetSaltbridge()
 		return -333;	
 	}else
 	{
-		tsensor = YGenericSensor::nextGenericSensor();	
-		while(tsensor == null)
+		tsensor = tsensor.nextGenericSensor();	
+		while(tsensor == NULL)
 		{
-			tsensor = YGenericSensor::nextGenericSensor();	
+			tsensor = tsensor.nextGenericSensor();	
 		}
 	}
 		 
 	float Resistance = tsensor->get_currentRawValue();
-	string Unit = tsensor->get_unit()
+	string Unit = tsensor->get_unit();
 	
 	YAPI::FreeAPI();
 	
@@ -1145,7 +1145,7 @@ float Canbus::GetThermistor()
 	}
 		 
 	float Temperature = tsensor->get_currentRawValue();
-	string Unit = tsensor->get_unit()
+	string Unit = tsensor->get_unit();
 	
 	YAPI::FreeAPI();
 	
