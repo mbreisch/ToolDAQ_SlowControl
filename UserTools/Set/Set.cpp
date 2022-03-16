@@ -29,186 +29,14 @@ bool Set::Initialise(std::string configfile, DataModel &data){
 
 bool Set::Execute(){
 	int retval;
-	//check LV/HV state_set 
+	LoadConfig();
 
+	if(m_data->SCMonitor.recieveFlag==0){m_data->vars.Set("StopLoop",1);}
 
-	std::cout << "Let's ";
-	if(m_data->SCMonitor.recieveFlag==0 || m_data->SCMonitor.recieveFlag==1)
-	{
-		std::cout << "start the setup!" << std::endl;
+	if(m_data->SCMonitor.recieveFlag==1){Setup();}
+	
+	if(m_data->SCMonitor.recieveFlag==2){return true;}
 
-		//------------------------------------Relay 1 Control
-		std::cout << "Do you want to turn Relay 1 on/off? 0:OFF , 1:ON | " ;
-		std::cin >> m_data->SCMonitor.relayCh1;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
-		if(m_data->SCMonitor.relayCh1!=m_data->SCMonitor.relayCh1_mon)
-		{
-			retval = m_data->CB->SetRelay(1,m_data->SCMonitor.relayCh1);
-			if(retval!=0 && retval!=1)
-			{
-				std::cout << " There was an error (Relay 1) with retval: " << retval << std::endl;
-			}
-		}
-
-		//------------------------------------Relay 2 Control
-		std::cout << "Do you want to turn Relay 2 on/off? 0:OFF , 1:ON | " ;
-		std::cin >> m_data->SCMonitor.relayCh2;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		m_data->SCMonitor.relayCh2_mon = m_data->CB->GetRelayState(2);
-		if(m_data->SCMonitor.relayCh2!=m_data->SCMonitor.relayCh2_mon)
-		{
-			retval = m_data->CB->SetRelay(2,m_data->SCMonitor.relayCh2);
-			if(retval!=0 && retval!=1)
-			{
-				std::cout << " There was an error (Relay 2) with retval: " << retval << std::endl;
-			}
-		}
-
-		//------------------------------------Relay 3 Control
-		std::cout << "Do you want to turn Relay 3 on/off? 0:OFF , 1:ON | " ;
-		std::cin >> m_data->SCMonitor.relayCh3;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
-		if(m_data->SCMonitor.relayCh3!=m_data->SCMonitor.relayCh3_mon)
-		{
-			retval = m_data->CB->SetRelay(3,m_data->SCMonitor.relayCh3);
-			if(retval!=0 && retval!=1)
-			{
-				std::cout << " There was an error (Relay 3) with retval: " << retval << std::endl;
-			}
-		}  
-		
-		retval = m_data->CB->SetLV(false);
-
-		//------------------------------------HV Control
-		std::cout << "Do you want to turn HV on/off? 0:OFF , 1:ON | " ;
-		std::cin >> m_data->SCMonitor.HV_state_set;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		bool tempHVmon;
-		int tCB_HV = m_data->CB->GetHV_ONOFF();
-		if(tCB_HV==0)
-		{
-			tempHVmon = false;
-			m_data->SCMonitor.HV_mon = 0;
-		}else if(tCB_HV==1)
-		{
-			tempHVmon = true;
-			m_data->SCMonitor.HV_mon = 1;
-		}  
-		if(m_data->SCMonitor.HV_state_set!=tempHVmon)
-		{
-			retval = m_data->CB->SetHV_ONOFF(m_data->SCMonitor.HV_state_set);
-			if(retval!=0 && retval!=1)
-			{
-				std::cout << " There was an error (Set HV) with retval: " << retval << std::endl;
-			}
-		}
-
-		if(m_data->SCMonitor.HV_state_set==true||m_data->SCMonitor.HV_state_set==false)
-		{
-			std::cout << "What value do you want to set the HV to in [V]? | currently from file " << m_data->CB->get_HV_volts << " ";
-			std::cin >> m_data->SCMonitor.HV_volts;
-			cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		}
-		int retstate = m_data->CB->GetHV_ONOFF();
-		m_data->SCMonitor.HV_return_mon = m_data->CB->ReturnedHvValue;
-		if(abs(m_data->CB->get_HV_volts-m_data->SCMonitor.HV_return_mon)>0.1)
-		{
-			std::cout << "ERROR! " << "File gave " << m_data->CB->get_HV_volts << " Readback gave " << m_data->SCMonitor.HV_return_mon << std::endl;
-			std::cout << "Setting them as the read back value" << std::endl;
-			m_data->CB->get_HV_volts = m_data->SCMonitor.HV_return_mon;
-		}
-		if(m_data->SCMonitor.HV_volts!=m_data->CB->get_HV_volts)
-		{
-			retval = m_data->CB->SetHV_voltage(m_data->SCMonitor.HV_volts);
-			if(retval==0)
-			{
-				m_data->CB->get_HV_volts = m_data->SCMonitor.HV_volts;
-				std::fstream outfile("./configfiles/BreakOutBox/LastHV.txt", std::ios_base::out | std::ios_base::trunc);
-				outfile << m_data->CB->get_HV_volts;
-				outfile.close();
-			}else
-			{
-				std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
-			}
-		}
-		
-		//------------------------------------LV Control
-		std::cout << "Do you want to turn LV on/off? 0:OFF , 1:ON | " ;
-		std::cin >> m_data->SCMonitor.LV_state_set;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		bool tempLVmon;
-		int tCB_LV = m_data->CB->GetLV_ONOFF();
-		if(tCB_LV==0)
-		{
-			tempLVmon = false;
-			m_data->SCMonitor.LV_mon = 0;
-		}else if(tCB_LV==1)
-		{
-			tempLVmon = true;
-			m_data->SCMonitor.LV_mon = 1;
-		}else
-		{
-			std::cout << "No read came in, retval: " << tCB_LV << std::endl;
-		}
-		if(m_data->SCMonitor.LV_state_set!=tempLVmon)
-		{
-			retval = m_data->CB->SetLV(m_data->SCMonitor.LV_state_set);
-			if(retval!=0 && retval!=1)
-			{
-				std::cout << " There was an error (Set LV) with retval: " << retval << std::endl;
-			}
-		}
-
-
-		//------------------------------------Triggerboard Control
-		float tempval;
-		std::cout << "What value is the triggerboard reference value in [V]? | " ;
-		std::cin >> m_data->SCMonitor.TrigVref;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		std::cout << "What value is the triggerboard threshold value for DAC0 in [V]? | " ;
-		std::cin >> m_data->SCMonitor.Trig0_threshold;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		if(m_data->SCMonitor.Trig0_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
-		{
-			retval = m_data->CB->SetTriggerDac0(m_data->SCMonitor.Trig0_threshold, m_data->SCMonitor.TrigVref);
-			if(retval!=0)
-			{
-				std::cout << " There was an error (DAC0) with retval: " << retval << std::endl;
-			}
-			tempval = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
-			if(std::abs(tempval - m_data->SCMonitor.Trig0_threshold)<0.001)
-			{
-				m_data->SCMonitor.Trig0_mon = tempval;
-			}else
-			{
-				std::cout << " There was an error (DAC0) - 0xC0 hasn't been updated!" << std::endl;
-			}
-		}
-
-
-		std::cout << "What value is the triggerboard threshold value for DAC1 in [V]? | " ;
-		std::cin >> m_data->SCMonitor.Trig1_threshold;
-		cin.ignore(numeric_limits<streamsize>::max(),'\n');
-		if(m_data->SCMonitor.Trig1_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
-		{
-			retval = m_data->CB->SetTriggerDac1(m_data->SCMonitor.Trig1_threshold, m_data->SCMonitor.TrigVref);
-			if(retval!=0)
-			{
-				std::cout << " There was an error (DAC1) with retval: " << retval << std::endl;
-			}
-			tempval = m_data->CB->GetTriggerDac1(m_data->SCMonitor.TrigVref);
-			if(std::abs(tempval - m_data->SCMonitor.Trig1_threshold)<0.001)
-			{
-				m_data->SCMonitor.Trig1_mon = tempval;
-			}else
-			{
-				std::cout << " There was an error (DAC1) - 0xC0 hasn't been updated!" << std::endl;
-			}
-		} 
-		m_data->SCMonitor.recieveFlag=2;
-	}
 	return true;
 }
 
@@ -236,6 +64,8 @@ bool Set::Finalise(){
 
 bool Set::LoadConfig()
 {
+	m_data->SCMonitor.recieveFlag = 1;
+	
 	//Load HV 
 	m_variables.Get("HV_state_set",m_data->SCMonitor.HV_state_set);
 	m_variables.Get("HV_volts",m_data->SCMonitor.HV_volts);
@@ -264,5 +94,151 @@ bool Set::LoadConfig()
 	m_variables.Get("LIMIT_Thermistor_temperature_low",m_data->SCMonitor.LIMIT_Thermistor_temperature_low);
 	m_variables.Get("LIMIT_Thermistor_temperature_high",m_data->SCMonitor.LIMIT_Thermistor_temperature_high);
 	
+	return true;
+}
+
+bool Set::Setup()
+{
+	//------------------------------------Relay 1 Control
+	m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
+	if(m_data->SCMonitor.relayCh1!=m_data->SCMonitor.relayCh1_mon)
+	{
+		retval = m_data->CB->SetRelay(1,m_data->SCMonitor.relayCh1);
+		if(retval!=0 && retval!=1)
+		{
+			std::cout << " There was an error (Relay 1) with retval: " << retval << std::endl;
+		}
+	}
+
+	//------------------------------------Relay 2 Control
+	m_data->SCMonitor.relayCh2_mon = m_data->CB->GetRelayState(2);
+	if(m_data->SCMonitor.relayCh2!=m_data->SCMonitor.relayCh2_mon)
+	{
+		retval = m_data->CB->SetRelay(2,m_data->SCMonitor.relayCh2);
+		if(retval!=0 && retval!=1)
+		{
+			std::cout << " There was an error (Relay 2) with retval: " << retval << std::endl;
+		}
+	}
+
+	//------------------------------------Relay 3 Control
+	m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
+	if(m_data->SCMonitor.relayCh3!=m_data->SCMonitor.relayCh3_mon)
+	{
+		retval = m_data->CB->SetRelay(3,m_data->SCMonitor.relayCh3);
+		if(retval!=0 && retval!=1)
+		{
+			std::cout << " There was an error (Relay 3) with retval: " << retval << std::endl;
+		}
+	}  
+		
+	retval = m_data->CB->SetLV(false);
+
+	//------------------------------------HV Control
+	bool tempHVmon;
+	int tCB_HV = m_data->CB->GetHV_ONOFF();
+	if(tCB_HV==0)
+	{
+		tempHVmon = false;
+		m_data->SCMonitor.HV_mon = 0;
+	}else if(tCB_HV==1)
+	{
+		tempHVmon = true;
+		m_data->SCMonitor.HV_mon = 1;
+	}  
+	if(m_data->SCMonitor.HV_state_set!=tempHVmon)
+	{
+		retval = m_data->CB->SetHV_ONOFF(m_data->SCMonitor.HV_state_set);
+		if(retval!=0 && retval!=1)
+		{
+			std::cout << " There was an error (Set HV) with retval: " << retval << std::endl;
+		}
+	}
+
+	int retstate = m_data->CB->GetHV_ONOFF();
+	m_data->SCMonitor.HV_return_mon = m_data->CB->ReturnedHvValue;
+	if(abs(m_data->CB->get_HV_volts-m_data->SCMonitor.HV_return_mon)>0.5)
+	{
+		std::cout << "ERROR! " << "File gave " << m_data->CB->get_HV_volts << " Readback gave " << m_data->SCMonitor.HV_return_mon << std::endl;
+		std::cout << "Setting them as the read back value" << std::endl;
+		m_data->CB->get_HV_volts = m_data->SCMonitor.HV_return_mon;
+	}
+	if(m_data->SCMonitor.HV_volts!=m_data->CB->get_HV_volts)
+	{
+		retval = m_data->CB->SetHV_voltage(m_data->SCMonitor.HV_volts);
+		if(retval==0)
+		{
+			m_data->CB->get_HV_volts = m_data->SCMonitor.HV_volts;
+			std::fstream outfile("./configfiles/BreakOutBox/LastHV.txt", std::ios_base::out | std::ios_base::trunc);
+			outfile << m_data->CB->get_HV_volts;
+			outfile.close();
+		}else
+		{
+			std::cout << " There was an error (HV V set) with retval: " << retval << std::endl;
+		}
+	}
+		
+	//------------------------------------LV Control
+	bool tempLVmon;
+	int tCB_LV = m_data->CB->GetLV_ONOFF();
+	if(tCB_LV==0)
+	{
+		tempLVmon = false;
+		m_data->SCMonitor.LV_mon = 0;
+	}else if(tCB_LV==1)
+	{
+		tempLVmon = true;
+		m_data->SCMonitor.LV_mon = 1;
+	}else
+	{
+		std::cout << "No read came in, retval: " << tCB_LV << std::endl;
+	}
+	if(m_data->SCMonitor.LV_state_set!=tempLVmon)
+	{
+		retval = m_data->CB->SetLV(m_data->SCMonitor.LV_state_set);
+		if(retval!=0 && retval!=1)
+		{
+			std::cout << " There was an error (Set LV) with retval: " << retval << std::endl;
+		}
+	}
+
+
+	//------------------------------------Triggerboard Control
+	float tempval;
+	if(m_data->SCMonitor.Trig0_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
+	{
+		retval = m_data->CB->SetTriggerDac0(m_data->SCMonitor.Trig0_threshold, m_data->SCMonitor.TrigVref);
+		if(retval!=0)
+		{
+			std::cout << " There was an error (DAC0) with retval: " << retval << std::endl;
+		}
+		tempval = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
+		if(std::abs(tempval - m_data->SCMonitor.Trig0_threshold)<0.001)
+		{
+			m_data->SCMonitor.Trig0_mon = tempval;
+		}else
+		{
+			std::cout << " There was an error (DAC0) - 0xC0 hasn't been updated!" << std::endl;
+		}
+	}
+
+	if(m_data->SCMonitor.Trig1_threshold!=m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref))
+	{
+		retval = m_data->CB->SetTriggerDac1(m_data->SCMonitor.Trig1_threshold, m_data->SCMonitor.TrigVref);
+		if(retval!=0)
+		{
+			std::cout << " There was an error (DAC1) with retval: " << retval << std::endl;
+		}
+		tempval = m_data->CB->GetTriggerDac1(m_data->SCMonitor.TrigVref);
+		if(std::abs(tempval - m_data->SCMonitor.Trig1_threshold)<0.001)
+		{
+			m_data->SCMonitor.Trig1_mon = tempval;
+		}else
+		{
+			std::cout << " There was an error (DAC1) - 0xC0 hasn't been updated!" << std::endl;
+		}
+	} 
+	m_data->SCMonitor.recieveFlag=2;
+
 	return true;
 }
