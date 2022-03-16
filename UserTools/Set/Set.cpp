@@ -76,7 +76,7 @@ bool Set::LoadConfig()
 	//Load Triggerboard
 	m_variables.Get("Trig0_threshold",m_data->SCMonitor.Trig0_threshold);
 	m_variables.Get("Trig1_threshold",m_data->SCMonitor.Trig1_threshold);
-	m_variables.Get("TrigVref",m_data->SCMonitor.TrigVre);
+	m_variables.Get("TrigVref",m_data->SCMonitor.TrigVref);
 
 	//Load Relays
 	m_variables.Get("relayCh1",m_data->SCMonitor.relayCh1);
