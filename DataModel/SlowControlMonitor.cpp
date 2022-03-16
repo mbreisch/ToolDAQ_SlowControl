@@ -361,6 +361,7 @@ bool SlowControlMonitor::Print(){
 	std::cout << "Threshold for DAC 0 is " << Trig0_mon << " V" << std::endl;
 	std::cout << "Threshold for DAC 1 is " << Trig1_mon << " V" << std::endl;
 	std::cout << "Photodiode return is " << light << std::endl;
+	std::cout << "Saltbridge return is " << saltbridge << std::endl;
 	if(errorcodes.size()==1 && errorcodes[0]==0x00000000)
 	{
 		printf("No errorcodes found all good: 0x%08x\n", errorcodes[0]);
