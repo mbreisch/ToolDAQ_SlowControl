@@ -173,7 +173,7 @@ bool SlowControlMonitor::Receive_Mon(zmq::socket_t* sock){
 	
 	//Saltbridge
 	sock->recv(&msg);   
-	saltbridge=*(reinterpret_cast<int*>(msg.data()));
+	saltbridge=*(reinterpret_cast<float*>(msg.data()));
 	
 	//Error
 	sock->recv(&msg);
