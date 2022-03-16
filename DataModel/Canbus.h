@@ -88,7 +88,7 @@ public:
 	int SetRelay(int idx, bool state);
 	bool GetRelayState(int idx);
 
-	int GetSaltbridge();
+	float GetSaltbridge();
 
 	int s;
 	int nbytes;
