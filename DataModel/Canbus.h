@@ -76,6 +76,7 @@ public:
 
 	//RHT
 	vector<float> GetTemp(); //done
+	float GetThermistor(); 
 
 	//Trigger DAC
 	float GetTriggerDac0(float TrigVref);
@@ -87,6 +88,7 @@ public:
 	int SetRelay(int idx, bool state);
 	bool GetRelayState(int idx);
 
+	int GetSaltbridge();
 
 	int s;
 	int nbytes;
