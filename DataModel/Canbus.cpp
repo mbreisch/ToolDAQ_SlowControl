@@ -1104,10 +1104,10 @@ float Canbus::GetSaltbridge()
 		return -333;	
 	}else
 	{
-		tsensor = tsensor.nextGenericSensor();	
+		tsensor = tsensor->nextGenericSensor();	
 		while(tsensor == NULL)
 		{
-			tsensor = tsensor.nextGenericSensor();	
+			tsensor = tsensor->nextGenericSensor();	
 		}
 	}
 		 
