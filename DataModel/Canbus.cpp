@@ -1105,8 +1105,11 @@ float Canbus::GetSaltbridge()
 	}else
 	{
 		tsensor = YGenericSensor::nextGenericSensor();	
+		while(tsensor == null)
+		{
+			tsensor = YGenericSensor::nextGenericSensor();	
+		}
 	}
-	serial = tsensor->get_module()->get_serialNumber();
 		 
 	float Resistance = tsensor->get_currentRawValue();
 	string Unit = tsensor->get_unit()
@@ -1140,7 +1143,6 @@ float Canbus::GetThermistor()
 	{
 		return -333;	
 	}
-	serial = tsensor->get_module()->get_serialNumber();
 		 
 	float Temperature = tsensor->get_currentRawValue();
 	string Unit = tsensor->get_unit()
