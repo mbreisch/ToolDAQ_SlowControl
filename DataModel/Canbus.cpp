@@ -1099,7 +1099,7 @@ float Canbus::GetSaltbridge()
 	target ="THRMSTR2-123456";
 	
 	tsensor = YGenericSensor::FirstGenericSensor();
-	if (!t->isOnline())
+	if (!tsensor->isOnline())
 	{
 		return -333;	
 	}else
@@ -1108,8 +1108,8 @@ float Canbus::GetSaltbridge()
 	}
 	serial = tsensor->get_module()->get_serialNumber();
 		 
-	float Resistance = t->get_currentRawValue();
-	string Unit = tsensort->get_unit()
+	float Resistance = tsensor->get_currentRawValue();
+	string Unit = tsensor->get_unit()
 	
 	YAPI::FreeAPI();
 	
@@ -1136,14 +1136,14 @@ float Canbus::GetThermistor()
 	target ="THRMSTR2-123456";
 	
 	tsensor = YTemperature::FirstGenericSensor();
-	if (!t->isOnline())
+	if (!tsensor->isOnline())
 	{
 		return -333;	
 	}
 	serial = tsensor->get_module()->get_serialNumber();
 		 
 	float Temperature = t->get_currentRawValue();
-	string Unit = tsensort->get_unit()
+	string Unit = tsensor->get_unit()
 	
 	YAPI::FreeAPI();
 	
