@@ -28,7 +28,7 @@ bool Set::Initialise(std::string configfile, DataModel &data){
 
 
 bool Set::Execute(){
-	int retval;
+
 	LoadConfig();
 
 	if(m_data->SCMonitor.recieveFlag==0){m_data->vars.Set("StopLoop",1);}
