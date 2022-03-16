@@ -49,7 +49,7 @@ class SlowControlMonitor : public SerialisableObject{
   float v12=-444;
  
   //Saltbridge
-  int saltbridge = -1;
+  float saltbridge = -1;
 
   //Emergency variables
   float LIMIT_temperature_low = 0;
