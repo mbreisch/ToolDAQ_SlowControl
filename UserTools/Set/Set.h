@@ -28,6 +28,8 @@ class Set: public Tool {
   bool Execute(); ///< Executre function used to perform Tool perpose. 
   bool Finalise(); ///< Finalise funciton used to clean up resorces.
 
+  bool LoadConfig();
+  bool Setup();
 
  private:
 
