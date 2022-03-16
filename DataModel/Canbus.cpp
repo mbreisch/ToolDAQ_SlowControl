@@ -1104,7 +1104,7 @@ float Canbus::GetSaltbridge()
 		return -333;	
 	}else
 	{
-		tsensor = YGenericSensor::NextGenericSensor();	
+		tsensor = YGenericSensor::nextGenericSensor();	
 	}
 	serial = tsensor->get_module()->get_serialNumber();
 		 
@@ -1123,7 +1123,7 @@ float Canbus::GetThermistor()
 {
 	//init
 	string errmsg, target, serial;
-	YTemperature *tsensor;
+	YGenericSensor *tsensor;
 	
 	// Setup the API to use local USB devices
 	if (YAPI::RegisterHub("usb", errmsg) != YAPI::SUCCESS) 
@@ -1135,14 +1135,14 @@ float Canbus::GetThermistor()
 	//Get target device and sensor
 	target ="THRMSTR2-123456";
 	
-	tsensor = YTemperature::FirstGenericSensor();
+	tsensor = YGenericSensor::FirstGenericSensor();
 	if (!tsensor->isOnline())
 	{
 		return -333;	
 	}
 	serial = tsensor->get_module()->get_serialNumber();
 		 
-	float Temperature = t->get_currentRawValue();
+	float Temperature = tsensor->get_currentRawValue();
 	string Unit = tsensor->get_unit()
 	
 	YAPI::FreeAPI();
