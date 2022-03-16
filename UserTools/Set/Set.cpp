@@ -30,44 +30,7 @@ bool Set::Initialise(std::string configfile, DataModel &data){
 bool Set::Execute(){
 	int retval;
 	//check LV/HV state_set 
-	if(m_data->SCMonitor.recieveFlag==0)
-	{
-		bool temp_HVS;
-		m_variables.Get("HV_state_set",temp_HVS);
-		m_data->SCMonitor.HV_state_set = temp_HVS;
 
-		bool temp_LVS;
-		m_variables.Get("LV_state_set",temp_LVS);
-		m_data->SCMonitor.LV_state_set = temp_LVS;
-
-		float temp_HVV;
-		m_variables.Get("HV_volts",temp_HVV);
-		m_data->SCMonitor.HV_volts = temp_HVV;
-
-		float temp_Tr1;
-		m_variables.Get("Trig1_threshold",temp_Tr1);
-		m_data->SCMonitor.Trig1_threshold = temp_Tr1;
-
-		float temp_Tr0;
-		m_variables.Get("Trig0_threshold",temp_Tr0);
-		m_data->SCMonitor.Trig0_threshold = temp_Tr0;
-
-		float temp_VREF;
-		m_variables.Get("TrigVref",temp_VREF);
-		m_data->SCMonitor.TrigVref = temp_VREF;
-
-		bool temp_r1, temp_r2,temp_r3;
-		m_variables.Get("relayCh1",temp_r1);
-		m_data->SCMonitor.relayCh1 = temp_r1;
-		m_variables.Get("relayCh2",temp_r2);
-		m_data->SCMonitor.relayCh2 = temp_r2;
-		m_variables.Get("relayCh3",temp_r3);
-		m_data->SCMonitor.relayCh3 = temp_r3;
-
-		m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
-		m_data->SCMonitor.relayCh2_mon = m_data->CB->GetRelayState(2);
-		m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);
-	}
 
 	std::cout << "Let's ";
 	if(m_data->SCMonitor.recieveFlag==0 || m_data->SCMonitor.recieveFlag==1)
@@ -268,4 +231,38 @@ bool Set::Finalise(){
 */	
 	m_data->CB->get_HV_volts = 0;
   	return true;
+}
+
+
+bool Set::LoadConfig()
+{
+	//Load HV 
+	m_variables.Get("HV_state_set",m_data->SCMonitor.HV_state_set);
+	m_variables.Get("HV_volts",m_data->SCMonitor.HV_volts);
+	
+	//Load LV
+	m_variables.Get("LV_state_set",m_data->SCMonitor.LV_state_set);
+
+	//Load Triggerboard
+	m_variables.Get("Trig0_threshold",m_data->SCMonitor.Trig0_threshold);
+	m_variables.Get("Trig1_threshold",m_data->SCMonitor.Trig1_threshold);
+	m_variables.Get("TrigVref",m_data->SCMonitor.TrigVre);
+
+	//Load Relays
+	m_variables.Get("relayCh1",m_data->SCMonitor.relayCh1);
+	m_variables.Get("relayCh2",m_data->SCMonitor.relayCh2);
+	m_variables.Get("relayCh3",m_data->SCMonitor.relayCh3);
+	m_data->SCMonitor.relayCh1_mon = m_data->CB->GetRelayState(1);
+	m_data->SCMonitor.relayCh2_mon = m_data->CB->GetRelayState(2);
+	m_data->SCMonitor.relayCh3_mon = m_data->CB->GetRelayState(3);	
+	
+	//Load Limits
+	m_variables.Get("LIMIT_temperature_low",m_data->SCMonitor.LIMIT_temperature_low);
+	m_variables.Get("LIMIT_temperature_high",m_data->SCMonitor.LIMIT_temperature_high);
+	m_variables.Get("LIMIT_humidity_low",m_data->SCMonitor.LIMIT_humidity_low);
+	m_variables.Get("LIMIT_humidity_high",m_data->SCMonitor.LIMIT_humidity_high);
+	m_variables.Get("LIMIT_Thermistor_temperature_low",m_data->SCMonitor.LIMIT_Thermistor_temperature_low);
+	m_variables.Get("LIMIT_Thermistor_temperature_high",m_data->SCMonitor.LIMIT_Thermistor_temperature_high);
+	
+	return true;
 }
