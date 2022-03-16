@@ -20,9 +20,10 @@ bool Poll::Initialise(std::string configfile, DataModel &data){
 
 bool Poll::Execute(){
 
+  if(m_data->SCMonitor.recieveFlag==0){return true;}
+  
   //LV
-  int LVstate = m_data->CB->GetLV_ONOFF();
-  m_data->SCMonitor.LV_mon = LVstate;
+  m_data->SCMonitor.LV_mon = m_data->CB->GetLV_ONOFF();
 
   
   std::vector<float> LVvoltage = m_data->CB->GetLV_voltage();
@@ -31,14 +32,14 @@ bool Poll::Execute(){
   m_data->SCMonitor.v12 = LVvoltage[2];
 
   //HV
-  int HVstate = m_data->CB->GetHV_ONOFF();
-  m_data->SCMonitor.HV_mon = HVstate;
+  m_data->SCMonitor.HV_mon = m_data->CB->GetHV_ONOFF();
   m_data->SCMonitor.HV_return_mon = m_data->CB->ReturnedHvValue;
 
   //RHT
   vector<float> RHT = m_data->CB->GetTemp();
   m_data->SCMonitor.temperature_mon = RHT[0];
   m_data->SCMonitor.humidity_mon = RHT[1];
+  m_data->SCMonitor.temperature_thermistor = m_data->CB->GetThermistor();
   
   //DAC0
   m_data->SCMonitor.Trig0_mon = m_data->CB->GetTriggerDac0(m_data->SCMonitor.TrigVref);
@@ -53,6 +54,8 @@ bool Poll::Execute(){
   
   //Photodiode
   m_data->SCMonitor.light = m_data->CB->GetPhotodiode();
+  
+  m_data->SCMonitor.saltbridge = m_data->CB->GetSaltbridge();
   
   m_data->SCMonitor.Print();
   usleep(10000000);
