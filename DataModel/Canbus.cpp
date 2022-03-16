@@ -1102,7 +1102,7 @@ float Canbus::GetThermistor(){
 	//Get target device and sensor
 	target ="THRMSTR2-123456";
 	YTemperature *t;
-	for(i=1; i<4; i++)
+	for(int i=1; i<4; i++)
 	{
 		tsensor = YTemperature::FindTemperature(target + ".temperature" + to_string(i));
 		serial = tsensor->get_module()->get_serialNumber();
