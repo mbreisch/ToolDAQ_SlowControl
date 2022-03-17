@@ -14,7 +14,7 @@ DataModelLib =
 MyToolsInclude =
 MyToolsLib = 
 
-YOCTOLib = -L $(ToolDAQPath)/YOCTO/Binaries/linux/aarch64 -lyocto -lm -lpthread
+YOCTOLib = -L $(ToolDAQPath)/YOCTO/Binaries/linux/armhf -lyocto -lm -lpthread
 YOCTOInclude = -I $(ToolDAQPath)/YOCTO/Sources
 
 all: lib/libStore.so lib/libLogging.so lib/libDataModel.so include/Tool.h lib/libMyTools.so lib/libServiceDiscovery.so lib/libToolChain.so main RemoteControl  NodeDaemon
