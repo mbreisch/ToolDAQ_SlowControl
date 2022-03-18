@@ -3,7 +3,7 @@ verbose 9
 
 #standard reveive flag for the set tool
 recieveFlag 1 #int
-ThermistorID XXX
+ThermistorID THRMSTR2-1C7FFA
 
 #HV settings
 HV_state_set 0 #bool
