@@ -1149,11 +1149,12 @@ float Canbus::GetThermistor()
 	
 	cout << "serial " << serial << endl;
 	
-	YTemperature *temperature;
-	temperature = YTemperature::FindTemperature(serial+".temperature1");
-	
+	YTemperature *t1 = YTemperature::FindTemperature(serial + ".temperature1");
+
+	if(t1->isOnline()){
 	cout << " | 1: " << t1->get_currentValue();
 	cout << " | deg C |" << endl;
+	}
 	/*std::cout << "Trying to connect to Sensor" << std::endl;
 	tsensor = YGenericSensor::FirstGenericSensor();
 	if (!tsensor->isOnline())
