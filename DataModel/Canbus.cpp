@@ -1129,7 +1129,7 @@ float Canbus::GetThermistor()
 {
 	//init
 	string errmsg, target, serial;
-	YGenericSensor *tsensor;
+	YTemperature *tsensor;
 	
 	std::cout << "Trying to connect to USB" << std::endl;
 	
@@ -1144,20 +1144,20 @@ float Canbus::GetThermistor()
 	//Get target device and sensor
 	target =thermistor_id;
 	
-	//tsensor = YTemperature::FindTemperature(target + ".temperature1");
-	//serial = tsensor->get_module()->get_serialNumber();
+	tsensor = YTemperature::FindTemperature(target + ".temperature1");
+	serial = tsensor->get_module()->get_serialNumber();
 	
-	tsensor = YGenericSensor::FindGenericSensor(target + ".genericsensor1");
-	serial = tsensor->get_module()->get_serialNumber();	
+	//tsensor = YGenericSensor::FindGenericSensor(target + ".genericsensor1");
+	//serial = tsensor->get_module()->get_serialNumber();	
 	
 	cout << "serial " << serial << endl;
 	
-	YGenericSensor *t1 = YGenericSensor::FindGenericSensor(serial + ".genericsensor1");
+	YTemperature *t1 = YTemperature::FindTemperature(serial + ".temperature1");
 
 	if(t1->isOnline()){
-		float Temperature = t1->get_currentRawValue();
+		float Temperature = t1->get_signalValue();
 		cout << "T for thermistor is " << Temperature << endl;
-		string Unit = t1->get_unit();
+		string Unit = t1->get_signalUnit();
 		cout << "Unit for thermistor is " << Unit << endl;
 	}
 	/*std::cout << "Trying to connect to Sensor" << std::endl;
