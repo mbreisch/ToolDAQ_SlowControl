@@ -1129,7 +1129,7 @@ float Canbus::GetThermistor()
 {
 	//init
 	string errmsg, target, serial;
-	YGenericSensor *tsensor;
+	YTemperature *tsensor;
 	
 	std::cout << "Trying to connect to USB" << std::endl;
 	
