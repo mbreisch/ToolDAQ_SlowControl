@@ -1117,7 +1117,7 @@ float Canbus::GetSaltbridge()
 
 	if(t1->isOnline()){
 		Resistance = t1->get_signalValue();
-		cout << "R for saltbridge is " << Temperature << endl;
+		cout << "R for saltbridge is " << Resistance << endl;
 		string Unit = t1->get_signalUnit();
 		cout << "Unit for saltbridge is " << Unit << endl;
 	}else
