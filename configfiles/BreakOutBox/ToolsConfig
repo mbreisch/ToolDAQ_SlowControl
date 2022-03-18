@@ -1,5 +1,5 @@
 #Recieve Recieve configfiles/BreakOutBox/RecieveConfig
 Set Set configfiles/BreakOutBox/SetConfig
 Poll Poll configfiles/BreakOutBox/PollConfig
-Emergency Emergency configfiles/BreakOutBox/EmergencyConfig
+Emergency Emergency configfiles/BreakOutBox/SetConfig
 #Stream Stream configfiles/BreakOutBox/StreamConfig
