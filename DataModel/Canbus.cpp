@@ -819,7 +819,7 @@ int Canbus::SetLV(bool state){
 	}
 
 	printf("Want to  write id: 0x%03x\n",id);
-	printf("Want to  write msg: 0x%03x\n",msg);
+	printf("Want to  write msg: 0x%0llxn",msg);
 	
 	retval = SendMessage(id,msg);
 	if(retval!=0)
