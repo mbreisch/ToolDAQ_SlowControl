@@ -1144,7 +1144,12 @@ float Canbus::GetThermistor()
 	//Get target device and sensor
 	target =thermistor_id;
 	
-	std::cout << "Trying to connect to Sensor" << std::endl;
+	YTemperature *temperature;
+	temperature = YTemperature::FindTemperature(thermistor_id+".temperature1");
+	
+	cout << " | 1: " << t1->get_currentValue();
+	cout << " | deg C |" << endl;
+	/*std::cout << "Trying to connect to Sensor" << std::endl;
 	tsensor = YGenericSensor::FirstGenericSensor();
 	if (!tsensor->isOnline())
 	{
@@ -1158,5 +1163,5 @@ float Canbus::GetThermistor()
 	
 	cout << "Unit for thermistor is " << Unit << endl;
 
-	return Temperature;
+	return Temperature;*/
 }
