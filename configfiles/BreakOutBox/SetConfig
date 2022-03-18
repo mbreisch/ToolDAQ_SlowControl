@@ -3,10 +3,11 @@ verbose 9
 
 #standard reveive flag for the set tool
 recieveFlag 1 #int
+ThermistorID XXX
 
 #HV settings
-HV_state_set 1 #bool
-HV_volts 100 #float
+HV_state_set 0 #bool
+HV_volts 0 #float
 
 #LV settings
 LV_state_set 1 #bool
@@ -17,7 +18,7 @@ LIMIT_temperature_high 60 #float
 LIMIT_humidity_low 30 #float
 LIMIT_humidity_high 60 #float
 LIMIT_Thermistor_temperature_low 40 #float
-LIMIT_Thermistor_temperature_high 40 #float
+LIMIT_Thermistor_temperature_high 60 #float
 
 #Triggerboard setttings
 Trig0_threshold 1.2 #float
