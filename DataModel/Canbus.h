@@ -89,6 +89,9 @@ public:
 	bool GetRelayState(int idx);
 
 	float GetSaltbridge();
+	
+	string thermistor_id="";
+	void setThermistorID(string in){thermistor_id=in;}
 
 	int s;
 	int nbytes;
