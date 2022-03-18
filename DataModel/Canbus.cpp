@@ -1131,6 +1131,8 @@ float Canbus::GetThermistor()
 	string errmsg, target, serial;
 	YGenericSensor *tsensor;
 	
+	std::cout << "Trying to connect to USB" << std::endl;
+	
 	// Setup the API to use local USB devices
 	if (YAPI::RegisterHub("usb", errmsg) != YAPI::SUCCESS) 
 	{
@@ -1138,9 +1140,11 @@ float Canbus::GetThermistor()
 		return -111;
 	}
 	
+	std::cout << "Thermistor ID is"  << thermistor_id << std::endl;
 	//Get target device and sensor
 	target =thermistor_id;
 	
+	std::cout << "Trying to connect to Sensor" << std::endl;
 	tsensor = YGenericSensor::FirstGenericSensor();
 	if (!tsensor->isOnline())
 	{
