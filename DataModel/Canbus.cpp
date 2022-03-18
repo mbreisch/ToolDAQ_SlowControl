@@ -1089,7 +1089,9 @@ float Canbus::GetSaltbridge()
 {
 	//init
 	string errmsg, target, serial;
-	YGenericSensor *tsensor;
+	YTemperature *tsensor;
+	
+	std::cout << "Trying to connect to USB" << std::endl;
 	
 	// Setup the API to use local USB devices
 	if (YAPI::RegisterHub("usb", errmsg) != YAPI::SUCCESS) 
@@ -1098,29 +1100,32 @@ float Canbus::GetSaltbridge()
 		return -111;
 	}
 	
+	std::cout << "Thermistor ID is"  << thermistor_id << std::endl;
 	//Get target device and sensor
 	target =thermistor_id;
 	
-	tsensor = YGenericSensor::FirstGenericSensor();
-	if (!tsensor->isOnline())
-	{
-		return -333;	
+	tsensor = YTemperature::FindTemperature(target + ".temperature4");
+	serial = tsensor->get_module()->get_serialNumber();
+	
+	//tsensor = YGenericSensor::FindGenericSensor(target + ".genericsensor1");
+	//serial = tsensor->get_module()->get_serialNumber();	
+	
+	//cout << "serial " << serial << endl;
+	
+	YTemperature *t1 = YTemperature::FindTemperature(serial + ".temperature4");
+
+	if(t1->isOnline()){
+		float Resistance = t1->get_signalValue();
+		cout << "R for saltbridge is " << Temperature << endl;
+		string Unit = t1->get_signalUnit();
+		cout << "Unit for saltbridge is " << Unit << endl;
 	}else
 	{
-		tsensor = tsensor->nextGenericSensor();	
-		while(tsensor == NULL)
-		{
-			tsensor = tsensor->nextGenericSensor();	
-		}
+		return -333;
 	}
-		 
-	float Resistance = tsensor->get_currentRawValue();
-	string Unit = tsensor->get_unit();
 	
 	YAPI::FreeAPI();
 	
-	cout << "Unit for saltbridge is " << Unit << endl;
-
 	return Resistance;
 }
 
@@ -1150,29 +1155,21 @@ float Canbus::GetThermistor()
 	//tsensor = YGenericSensor::FindGenericSensor(target + ".genericsensor1");
 	//serial = tsensor->get_module()->get_serialNumber();	
 	
-	cout << "serial " << serial << endl;
+	//cout << "serial " << serial << endl;
 	
 	YTemperature *t1 = YTemperature::FindTemperature(serial + ".temperature1");
 
 	if(t1->isOnline()){
 		float Temperature = t1->get_signalValue();
-		cout << "T for thermistor is " << Temperature << endl;
+		cout << "R for thermistor is " << Temperature << endl;
 		string Unit = t1->get_signalUnit();
 		cout << "Unit for thermistor is " << Unit << endl;
-	}
-	/*std::cout << "Trying to connect to Sensor" << std::endl;
-	tsensor = YGenericSensor::FirstGenericSensor();
-	if (!tsensor->isOnline())
+	}else
 	{
-		return -333;	
+		return -333;
 	}
-		 
-	float Temperature = tsensor->get_currentRawValue();
-	string Unit = tsensor->get_unit();
 	
 	YAPI::FreeAPI();
 	
-	cout << "Unit for thermistor is " << Unit << endl;
-
-	return Temperature;*/
+	return Temperature;
 }
