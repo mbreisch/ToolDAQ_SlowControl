@@ -66,6 +66,10 @@ bool Set::LoadConfig()
 {
 	m_data->SCMonitor.recieveFlag = 1;
 	
+	string tmpID;
+	m_variables.Get("ThermistorID",tmpID);
+	m_data->CB->setThermistorID(tmpID);
+	
 	//Load HV 
 	m_variables.Get("HV_state_set",m_data->SCMonitor.HV_state_set);
 	m_variables.Get("HV_volts",m_data->SCMonitor.HV_volts);
