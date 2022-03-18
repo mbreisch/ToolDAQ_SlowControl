@@ -1147,6 +1147,8 @@ float Canbus::GetThermistor()
 	tsensor = YTemperature::FindTemperature(target + ".temperature1");
 	serial = tsensor->get_module()->get_serialNumber();
 	
+	cout << "serial " << serial << endl;
+	
 	YTemperature *temperature;
 	temperature = YTemperature::FindTemperature(serial+".temperature1");
 	
