@@ -1144,8 +1144,11 @@ float Canbus::GetThermistor()
 	//Get target device and sensor
 	target =thermistor_id;
 	
+	tsensor = YTemperature::FindTemperature(target + ".temperature1");
+	serial = tsensor->get_module()->get_serialNumber();
+	
 	YTemperature *temperature;
-	temperature = YTemperature::FindTemperature(thermistor_id+".temperature1");
+	temperature = YTemperature::FindTemperature(serial+".temperature1");
 	
 	cout << " | 1: " << t1->get_currentValue();
 	cout << " | deg C |" << endl;
