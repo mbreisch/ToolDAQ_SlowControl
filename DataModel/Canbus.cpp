@@ -1090,6 +1090,7 @@ float Canbus::GetSaltbridge()
 	//init
 	string errmsg, target, serial;
 	YTemperature *tsensor;
+	float Resistance;
 	
 	std::cout << "Trying to connect to USB" << std::endl;
 	
@@ -1115,7 +1116,7 @@ float Canbus::GetSaltbridge()
 	YTemperature *t1 = YTemperature::FindTemperature(serial + ".temperature4");
 
 	if(t1->isOnline()){
-		float Resistance = t1->get_signalValue();
+		Resistance = t1->get_signalValue();
 		cout << "R for saltbridge is " << Temperature << endl;
 		string Unit = t1->get_signalUnit();
 		cout << "Unit for saltbridge is " << Unit << endl;
@@ -1135,6 +1136,7 @@ float Canbus::GetThermistor()
 	//init
 	string errmsg, target, serial;
 	YTemperature *tsensor;
+	float Temperature;
 	
 	std::cout << "Trying to connect to USB" << std::endl;
 	
@@ -1160,7 +1162,7 @@ float Canbus::GetThermistor()
 	YTemperature *t1 = YTemperature::FindTemperature(serial + ".temperature1");
 
 	if(t1->isOnline()){
-		float Temperature = t1->get_signalValue();
+		Temperature = t1->get_signalValue();
 		cout << "R for thermistor is " << Temperature << endl;
 		string Unit = t1->get_signalUnit();
 		cout << "Unit for thermistor is " << Unit << endl;
