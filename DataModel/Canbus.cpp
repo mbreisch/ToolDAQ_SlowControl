@@ -1096,7 +1096,7 @@ float Canbus::GetSaltbridge()
 	}
 	
 	//Get target device and sensor
-	target ="THRMSTR2-123456";
+	target =thermistor_id;
 	
 	tsensor = YGenericSensor::FirstGenericSensor();
 	if (!tsensor->isOnline())
@@ -1136,7 +1136,7 @@ float Canbus::GetThermistor()
 	}
 	
 	//Get target device and sensor
-	target ="THRMSTR2-123456";
+	target =thermistor_id;
 	
 	tsensor = YGenericSensor::FirstGenericSensor();
 	if (!tsensor->isOnline())
