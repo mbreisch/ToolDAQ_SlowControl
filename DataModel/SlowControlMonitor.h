@@ -28,7 +28,7 @@ class SlowControlMonitor : public SerialisableObject{
   std::string ident_string;
  
   //Version number
-  unsigned int VersionNumber = 0x0003;
+  unsigned int VersionNumber = 0x0004;
   
   //RHT
   float humidity_mon=-444;
@@ -61,6 +61,7 @@ class SlowControlMonitor : public SerialisableObject{
   int FLAG_temperature = 0;
   int FLAG_humidity = 0;
   int FLAG_temperature_Thermistor = 0;
+  int FLAG_saltbridge = 0; 
 
  
   //relay
@@ -112,6 +113,7 @@ class SlowControlMonitor : public SerialisableObject{
   ar & FLAG_temperature;
   ar & FLAG_humidity;
   ar & FLAG_temperature_Thermistor;
+  ar & FLAG_saltbridge;
   ar & Trig1_threshold;
   ar & Trig1_mon;
   ar & Trig0_threshold;
@@ -124,9 +126,9 @@ class SlowControlMonitor : public SerialisableObject{
   ar & relayCh2_mon;
   ar & relayCh3_mon;
   ar & light;
+  ar & saltbridge;
   ar & errorcodes;
  }
  
 };
 
-#endif
