@@ -132,3 +132,4 @@ class SlowControlMonitor : public SerialisableObject{
  
 };
 
+#endif
